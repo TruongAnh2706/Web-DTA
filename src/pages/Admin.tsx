@@ -617,13 +617,23 @@ const AdminPage = () => {
                             <Label className="flex items-center gap-2">
                               <Github className="w-4 h-4" />
                               {texts.githubUrl}
+                              {formData.github_url && (
+                                <Badge variant={formData.github_url.includes('github.com') ? 'default' : 'destructive'} className="text-[10px] h-4">
+                                  {formData.github_url.includes('github.com') ? 'Valid Domain' : 'Invalid'}
+                                </Badge>
+                              )}
                             </Label>
-                            <Input
-                              value={formData.github_url || ''}
-                              onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
-                              placeholder="https://github.com/..."
-                              className="rounded-xl"
-                            />
+                            <div className="flex gap-2">
+                              <Input
+                                value={formData.github_url || ''}
+                                onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
+                                placeholder="https://github.com/username/repo"
+                                className="rounded-xl flex-1"
+                              />
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">
+                              Enter the full URL to the public repository. The latest release will be fetched automatically.
+                            </p>
                           </div>
 
                           <div className="space-y-2">

@@ -2,11 +2,16 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 
+export type AccountType = 'Free' | 'VIP1' | 'VIP2';
+export type SubscriptionLevel = 'None' | 'Pro' | 'Lifetime';
+
 export interface AuthState {
     user: User | null;
     session: Session | null;
     loading: boolean;
     isAdmin: boolean;
+    accountType: AccountType;
+    subscriptionLevel: SubscriptionLevel;
     signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
     signUp: (email: string, password: string) => Promise<{ data: any; error: any }>;
     signOut: () => Promise<{ error: any }>;
@@ -21,11 +26,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         session: Session | null;
         loading: boolean;
         isAdmin: boolean;
+        accountType: AccountType;
+        subscriptionLevel: SubscriptionLevel;
     }>({
         user: null,
         session: null,
         loading: true,
         isAdmin: false,
+        accountType: 'Free',
+        subscriptionLevel: 'None',
     });
 
     useEffect(() => {
@@ -57,17 +66,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                             )
                         ]);
 
-                        isAdmin = !!roles;
+                        // Check specific admin email or roles
+                        if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
+                            isAdmin = true;
+                        } else {
+                            isAdmin = !!roles;
+                        }
                     } catch (err) {
                         console.error('Role check failed or timed out:', err);
                     }
                 }
+
+                // Read account type from user_metadata
+                const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
+                const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
 
                 setAuthState({
                     user,
                     session,
                     loading: false,
                     isAdmin,
+                    accountType,
+                    subscriptionLevel,
                 });
             }
         );
@@ -111,17 +131,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         )
                     ]);
 
-                    isAdmin = !!roles;
+                    // Check specific admin email or roles
+                    if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
+                        isAdmin = true;
+                    } else {
+                        isAdmin = !!roles;
+                    }
                 } catch (err) {
                     console.error('Role check failed (getSession) or timed out:', err);
                 }
             }
+
+            // Read account type from user_metadata
+            const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
+            const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
 
             setAuthState({
                 user,
                 session,
                 loading: false,
                 isAdmin,
+                accountType,
+                subscriptionLevel,
             });
         }).catch(err => {
             console.error('Get Session Error:', err);

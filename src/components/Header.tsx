@@ -1,9 +1,17 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sun, Moon, Languages, Settings, Wallet } from 'lucide-react';
+import { Menu, X, Sun, Moon, Languages, Settings, Wallet, LogOut, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
 import WalletModal from './WalletModal';
@@ -13,11 +21,18 @@ const Header = () => {
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
+  };
 
   const navItems = [
     { label: t.nav.home, href: '/' },
     { label: t.nav.apps, href: '/#apps' }, // We'll handle this click to ensure scrolling
+    { label: 'Web Tools', href: '/tools' },
     { label: language === 'vi' ? 'Bảng Giá' : 'Pricing', href: '/pricing' },
     { label: t.nav.about, href: '/#about' },
     { label: t.nav.contact, href: '/#contact' },
@@ -107,22 +122,44 @@ const Header = () => {
                     </Button>
                   </Link>
                 ) : null}
-                {/* Dashboard Link */}
+                {/* User Avatar Dropdown */}
                 {user && (
-                  <Link to="/dashboard">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-xl hover:bg-primary/10 hover:text-primary relative"
-                      title="Dashboard"
-                    >
-                      <img
-                        src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
-                        alt="Avatar"
-                        className="w-6 h-6 rounded-full"
-                      />
-                    </Button>
-                  </Link>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-xl hover:bg-primary/10 hover:text-primary relative"
+                        title="Account"
+                      >
+                        <img
+                          src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
+                          alt="Avatar"
+                          className="w-6 h-6 rounded-full"
+                        />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56 mt-2">
+                      <DropdownMenuLabel>
+                        {language === 'vi' ? 'Tài khoản của tôi' : 'My Account'}
+                      </DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <User className="w-4 h-4" />
+                          <span>{language === 'vi' ? 'Dashboard' : 'Dashboard'}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>{language === 'vi' ? 'Đăng xuất' : 'Logout'}</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 )}
 
                 {/* Wallet Button */}

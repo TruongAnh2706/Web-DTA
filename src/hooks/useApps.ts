@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Monitor, Globe, Zap, MousePointer2, Eye, Video, FileCode, Sparkles, type LucideIcon } from 'lucide-react';
+import type { AccountType } from '@/contexts/AuthContext';
 
 export type Platform = 'web' | 'desktop';
 
@@ -19,6 +20,7 @@ export interface AppData {
   image_url: string | null;
   featured: boolean;
   is_active: boolean;
+  required_subscription: AccountType; // Cấp độ cần thiết để truy cập: 'Free', 'VIP1', 'VIP2'
   created_at: string;
   updated_at: string;
 }

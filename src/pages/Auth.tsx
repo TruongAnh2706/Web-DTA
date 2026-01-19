@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, User, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,6 +14,8 @@ const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { user, loading: authLoading, signIn, signUp, signInWithGoogle } = useAuth();
@@ -25,6 +27,8 @@ const Auth = () => {
       signup: 'Sign Up',
       email: 'Email',
       password: 'Password',
+      fullName: 'Full Name',
+      phone: 'Phone Number',
       noAccount: "Don't have an account?",
       hasAccount: 'Already have an account?',
       loginSuccess: 'Login successful!',
@@ -36,6 +40,8 @@ const Auth = () => {
       signup: 'Đăng Ký',
       email: 'Email',
       password: 'Mật khẩu',
+      fullName: 'Họ và tên',
+      phone: 'Số điện thoại',
       noAccount: 'Chưa có tài khoản?',
       hasAccount: 'Đã có tài khoản?',
       loginSuccess: 'Đăng nhập thành công!',
@@ -70,7 +76,7 @@ const Auth = () => {
           title: texts.loginSuccess,
         });
       } else {
-        const { error } = await signUp(email, password);
+        const { error } = await signUp(email, password, fullName, phone);
         if (error) throw error;
         toast({
           title: texts.signupSuccess,
@@ -106,6 +112,44 @@ const Auth = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Họ tên - Chỉ hiển thị khi đăng ký */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="fullName">{texts.fullName}</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className="pl-10 rounded-xl"
+                    placeholder={language === 'vi' ? 'Nhập họ và tên' : 'Enter your full name'}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* SĐT - Chỉ hiển thị khi đăng ký */}
+            {!isLogin && (
+              <div className="space-y-2">
+                <Label htmlFor="phone">{texts.phone}</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="pl-10 rounded-xl"
+                    placeholder={language === 'vi' ? 'Nhập số điện thoại' : 'Enter your phone number'}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="email">{texts.email}</Label>
               <div className="relative">
@@ -208,7 +252,7 @@ const Auth = () => {
 
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="mt-6 text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="relative z-10 mt-6 text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {isLogin ? texts.noAccount : texts.hasAccount}{' '}
               <span className="font-semibold text-primary">

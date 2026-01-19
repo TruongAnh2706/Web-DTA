@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useApp, getIconComponent } from '@/hooks/useApps';
+import GitHubReleaseCard from '@/components/GitHubReleaseCard';
 import { useLanguage } from '@/contexts/LanguageContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Header from '@/components/Header';
@@ -204,20 +205,19 @@ const ProductDetail = () => {
                     )}
                   </Button>
                 </motion.div>
-                {app.github_url && (
-                  <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                      size="lg"
-                      variant="outline"
-                      className="rounded-full px-8 py-7 text-lg font-bold glass border-primary/30"
-                      onClick={() => window.open(app.github_url!, '_blank')}
-                    >
-                      <Github className="w-5 h-5 mr-2" />
-                      GitHub
-                    </Button>
-                  </motion.div>
-                )}
               </div>
+
+              {/* GitHub Release Card */}
+              {app.github_url && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="mt-6"
+                >
+                  <GitHubReleaseCard repoUrl={app.github_url} />
+                </motion.div>
+              )}
             </motion.div>
 
             {/* Right: Main Screenshot */}

@@ -1,12 +1,25 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Globe, Monitor, ExternalLink, Download, Loader2 } from 'lucide-react';
+import { Globe, Monitor, ExternalLink, Download, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useApps, getIconComponent, type AppData } from '@/hooks/useApps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/lib/data';
+import { useAuthContext, type AccountType } from '@/contexts/AuthContext';
+import UpgradeModal from '@/components/UpgradeModal';
+
+// Helper function để so sánh cấp độ subscription
+const subscriptionLevels: Record<AccountType, number> = {
+  'Free': 0,
+  'VIP1': 1,
+  'VIP2': 2,
+};
+
+const hasAccess = (userLevel: AccountType, requiredLevel: AccountType): boolean => {
+  return subscriptionLevels[userLevel] >= subscriptionLevels[requiredLevel];
+};
 
 type Category = 'all' | 'web' | 'desktop' | 'automation';
 
@@ -17,7 +30,14 @@ const categories: { id: Category; labelKey: keyof typeof translations.en.categor
   { id: 'automation', labelKey: 'automation' },
 ];
 
-const ProductCard = ({ app, index }: { app: AppData; index: number }) => {
+interface ProductCardProps {
+  app: AppData;
+  index: number;
+  isLocked?: boolean;
+  onLockedClick?: () => void;
+}
+
+const ProductCard = ({ app, index, isLocked = false, onLockedClick }: ProductCardProps) => {
   const { language, t } = useLanguage();
   const [rotateX, setRotateX] = useState(0);
   const [rotateY, setRotateY] = useState(0);
@@ -48,6 +68,14 @@ const ProductCard = ({ app, index }: { app: AppData; index: number }) => {
 
   const imageUrl = app.image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=340&fit=crop&auto=format';
 
+  // Handler for locked app click
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isLocked && onLockedClick) {
+      e.preventDefault();
+      onLockedClick();
+    }
+  };
+
   return (
     <motion.div
       layout
@@ -56,8 +84,9 @@ const ProductCard = ({ app, index }: { app: AppData; index: number }) => {
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
       className="group perspective-1000"
+      onClick={handleCardClick}
     >
-      <Link to={`/app/${app.id}`}>
+      <Link to={isLocked ? '#' : `/app/${app.id}`} className={isLocked ? 'cursor-pointer' : ''}>
         <motion.div
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
@@ -99,6 +128,21 @@ const ProductCard = ({ app, index }: { app: AppData; index: number }) => {
               >
                 <Badge className="gradient-neon text-background border-0 font-bold uppercase tracking-wider text-xs px-3 py-1">
                   Featured
+                </Badge>
+              </motion.div>
+            )}
+
+            {/* Lock Badge for VIP apps */}
+            {isLocked && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-4 right-4"
+                style={{ transform: 'translateZ(40px)' }}
+              >
+                <Badge className="bg-amber-500/90 text-white border-0 font-bold uppercase tracking-wider text-xs px-3 py-1 flex items-center gap-1">
+                  <Lock className="w-3 h-3" />
+                  VIP
                 </Badge>
               </motion.div>
             )}
@@ -172,8 +216,16 @@ const ProductCard = ({ app, index }: { app: AppData; index: number }) => {
 
 const ProductGrid = () => {
   const [activeCategory, setActiveCategory] = useState<Category>('all');
+  const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+  const [selectedRequiredLevel, setSelectedRequiredLevel] = useState<AccountType>('VIP1');
   const { t } = useLanguage();
   const { data: apps, isLoading, error } = useApps();
+  const { accountType } = useAuthContext();
+
+  const handleLockedAppClick = (requiredLevel: AccountType) => {
+    setSelectedRequiredLevel(requiredLevel);
+    setUpgradeModalOpen(true);
+  };
 
   const filteredApps = activeCategory === 'all'
     ? apps
@@ -214,8 +266,8 @@ const ProductGrid = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`px-6 py-3 rounded-full font-semibold uppercase tracking-wider text-sm transition-all duration-300 ${activeCategory === cat.id
-                  ? 'btn-neon text-background'
-                  : 'glass border-primary/20 hover:border-primary/50 hover:bg-primary/10'
+                ? 'btn-neon text-background'
+                : 'glass border-primary/20 hover:border-primary/50 hover:bg-primary/10'
                 }`}
             >
               {t.categories[cat.labelKey]}
@@ -244,13 +296,32 @@ const ProductGrid = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <AnimatePresence mode="popLayout">
-              {filteredApps?.map((app, index) => (
-                <ProductCard key={app.id} app={app} index={index} />
-              ))}
+              {filteredApps?.map((app, index) => {
+                const requiredLevel = app.required_subscription || 'Free';
+                const canAccess = hasAccess(accountType, requiredLevel);
+                const isLocked = !canAccess && requiredLevel !== 'Free';
+
+                return (
+                  <ProductCard
+                    key={app.id}
+                    app={app}
+                    index={index}
+                    isLocked={isLocked}
+                    onLockedClick={() => handleLockedAppClick(requiredLevel)}
+                  />
+                );
+              })}
             </AnimatePresence>
           </motion.div>
         )}
       </div>
+
+      {/* Upgrade Modal */}
+      <UpgradeModal
+        isOpen={upgradeModalOpen}
+        onClose={() => setUpgradeModalOpen(false)}
+        requiredLevel={selectedRequiredLevel}
+      />
     </section>
   );
 };
