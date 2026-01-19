@@ -137,12 +137,12 @@ const ProductCard = ({ app, index, isLocked = false, onLockedClick }: ProductCar
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute top-4 right-4"
-                style={{ transform: 'translateZ(40px)' }}
+                className="absolute top-1/2 left-1/2 z-20"
+                style={{ transform: 'translate3d(-50%, -50%, 40px)' }}
               >
-                <Badge className="bg-amber-500/90 text-white border-0 font-bold uppercase tracking-wider text-xs px-3 py-1 flex items-center gap-1">
-                  <Lock className="w-3 h-3" />
-                  VIP
+                <Badge className="bg-amber-500/90 text-white border-0 font-bold uppercase tracking-wider text-sm px-4 py-2 flex items-center gap-2 shadow-lg backdrop-blur-md">
+                  <Lock className="w-4 h-4" />
+                  VIP ACCESS
                 </Badge>
               </motion.div>
             )}

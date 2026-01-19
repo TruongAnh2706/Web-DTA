@@ -211,11 +211,11 @@ const Auth = () => {
             <Button
               type="button"
               variant="outline"
-              className="w-full rounded-xl py-6 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 group"
+              className="relative z-10 w-full rounded-xl py-6 border-primary/20 hover:bg-primary/10 hover:text-primary transition-all duration-300 group"
               onClick={async () => {
                 setLoading(true);
                 try {
-                  const { error } = await user?.signInWithGoogle() || await (useAuth as any)().signInWithGoogle(); // Safe fallback cast if type inference fails
+                  const { error } = await signInWithGoogle();
                   if (error) throw error;
                 } catch (error: any) {
                   toast({

@@ -18,6 +18,9 @@ export interface AppData {
   github_url: string | null;
   download_url: string | null;
   image_url: string | null;
+  screenshots: string[]; // Mảng URL ảnh màn hình
+  video_url: string | null; // Link YouTube
+  guide: string | null; // Nội dung hướng dẫn (Markdown)
   featured: boolean;
   is_active: boolean;
   required_subscription: AccountType; // Cấp độ cần thiết để truy cập: 'Free', 'VIP1', 'VIP2'

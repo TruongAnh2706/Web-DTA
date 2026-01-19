@@ -26,7 +26,7 @@
     --input: 220 15% 88%;
     --ring: 185 100% 50%;
     --radius: 0.75rem;
-    
+
     /* Custom tokens - Neon Theme */
     --neon-cyan: 185 100% 50%;
     --neon-red: 355 100% 55%;
@@ -37,7 +37,7 @@
     --glass-border: 0 0% 100% / 0.3;
     --glow-cyan: 185 100% 50%;
     --glow-red: 355 100% 55%;
-    
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -68,7 +68,7 @@
     --border: 220 25% 15%;
     --input: 220 25% 15%;
     --ring: 185 100% 50%;
-    
+
     /* Custom tokens - Neon Theme Dark */
     --neon-cyan: 185 100% 55%;
     --neon-red: 355 100% 60%;
@@ -79,7 +79,7 @@
     --glass-border: 185 100% 50% / 0.15;
     --glow-cyan: 185 100% 55%;
     --glow-red: 355 100% 60%;
-    
+
     --sidebar-background: 220 30% 6%;
     --sidebar-foreground: 210 20% 95%;
     --sidebar-primary: 185 100% 50%;
@@ -95,13 +95,18 @@
   * {
     @apply border-border;
   }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Be Vietnam Pro', sans-serif;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: 'Space Grotesk', 'Be Vietnam Pro', sans-serif;
     letter-spacing: 0.02em;
   }
@@ -119,14 +124,17 @@
 
   .glass-card:hover {
     border-color: hsl(var(--neon-cyan) / 0.5);
-    box-shadow: 
+    box-shadow:
       0 0 30px hsl(var(--neon-cyan) / 0.15),
       0 0 60px hsl(var(--neon-red) / 0.1),
       inset 0 1px 0 hsl(var(--neon-cyan) / 0.1);
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-primary via-[hsl(210,100%,60%)] to-accent bg-clip-text text-transparent;
+    background: linear-gradient(to right, hsl(var(--primary)), hsl(210, 100%, 60%), hsl(var(--accent)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
   .perspective-1000 {
@@ -138,13 +146,13 @@
   }
 
   .glow {
-    box-shadow: 
+    box-shadow:
       0 0 40px hsl(var(--neon-cyan) / 0.4),
       0 0 80px hsl(var(--neon-red) / 0.2);
   }
 
   .glow-sm {
-    box-shadow: 
+    box-shadow:
       0 0 20px hsl(var(--neon-cyan) / 0.3),
       0 0 40px hsl(var(--neon-red) / 0.15);
   }
@@ -163,6 +171,7 @@
 
   .neon-border {
     position: relative;
+    z-index: 10;
   }
 
   .neon-border::before {
@@ -178,6 +187,9 @@
     mask-composite: exclude;
     opacity: 0;
     transition: opacity 0.4s ease;
+    pointer-events: none;
+    /* FIX: Allow clicks to pass through to inputs */
+    z-index: -1;
   }
 
   .neon-border:hover::before {
@@ -187,14 +199,14 @@
   .btn-neon {
     @apply relative overflow-hidden font-semibold;
     background: linear-gradient(135deg, hsl(var(--neon-cyan)), hsl(var(--neon-blue)), hsl(var(--neon-red)));
-    box-shadow: 
+    box-shadow:
       0 0 20px hsl(var(--neon-cyan) / 0.4),
       0 0 40px hsl(var(--neon-red) / 0.2);
     transition: all 0.3s ease;
   }
 
   .btn-neon:hover {
-    box-shadow: 
+    box-shadow:
       0 0 30px hsl(var(--neon-cyan) / 0.6),
       0 0 60px hsl(var(--neon-red) / 0.4);
     transform: translateY(-2px);
@@ -207,12 +219,10 @@
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      rgba(255, 255, 255, 0.3),
-      transparent
-    );
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent);
     transition: left 0.5s ease;
   }
 
@@ -223,9 +233,12 @@
 
 /* Animated background gradient */
 @keyframes gradient-shift {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
@@ -238,15 +251,20 @@
 
 /* Particle float animation */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) translateX(0);
   }
+
   25% {
     transform: translateY(-20px) translateX(10px);
   }
+
   50% {
     transform: translateY(-10px) translateX(-10px);
   }
+
   75% {
     transform: translateY(-30px) translateX(5px);
   }
@@ -258,13 +276,16 @@
 
 /* Neon pulse animation */
 @keyframes neon-pulse {
-  0%, 100% {
-    box-shadow: 
+
+  0%,
+  100% {
+    box-shadow:
       0 0 20px hsl(var(--neon-cyan) / 0.4),
       0 0 40px hsl(var(--neon-red) / 0.2);
   }
+
   50% {
-    box-shadow: 
+    box-shadow:
       0 0 30px hsl(var(--neon-cyan) / 0.6),
       0 0 60px hsl(var(--neon-red) / 0.4);
   }

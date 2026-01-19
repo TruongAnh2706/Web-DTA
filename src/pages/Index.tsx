@@ -13,13 +13,19 @@ const Index = () => {
 
   useEffect(() => {
     // Check if there's a hash in the URL
-    if (location.hash) {
-      const element = document.querySelector(location.hash);
-      if (element) {
-        // Add a small delay to ensure content is loaded/rendered
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }, 100);
+    // Check if there's a hash in the URL and it's a valid ID selector
+    if (location.hash && !location.hash.includes('=')) {
+      try {
+        const element = document.querySelector(location.hash);
+        if (element) {
+          // Add a small delay to ensure content is loaded/rendered
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }, 100);
+        }
+      } catch (e) {
+        // Ignore invalid selectors
+        console.warn('Invalid hash selector:', location.hash);
       }
     }
   }, [location]);

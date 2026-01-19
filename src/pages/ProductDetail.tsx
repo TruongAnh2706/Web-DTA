@@ -11,6 +11,53 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
+// Simple Markdown Renderer Component
+const MarkdownRenderer = ({ content }: { content: string }) => {
+  if (!content) return null;
+
+  const lines = content.split('\n');
+  return (
+    <div className="space-y-4 text-muted-foreground leading-relaxed">
+      {lines.map((line, index) => {
+        // H2
+        if (line.startsWith('## ')) {
+          return <h2 key={index} className="text-2xl font-bold text-foreground mt-8 mb-4">{line.replace('## ', '')}</h2>;
+        }
+        // H3
+        if (line.startsWith('### ')) {
+          return <h3 key={index} className="text-xl font-semibold text-foreground mt-6 mb-3">{line.replace('### ', '')}</h3>;
+        }
+        // Bullet points
+        if (line.trim().startsWith('- ')) {
+          return (
+            <div key={index} className="flex items-start gap-2 ml-4">
+              <span className="text-primary mt-1.5">•</span>
+              <span>{parseBold(line.replace('- ', ''))}</span>
+            </div>
+          );
+        }
+        // Empty line
+        if (line.trim() === '') {
+          return <div key={index} className="h-2"></div>;
+        }
+        // Normal paragraph
+        return <p key={index}>{parseBold(line)}</p>;
+      })}
+    </div>
+  );
+};
+
+// Helper to parse **bold** text
+const parseBold = (text: string) => {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={i} className="text-foreground font-semibold">{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language, t } = useLanguage();
@@ -55,20 +102,19 @@ const ProductDetail = () => {
   const title = language === 'vi' ? app.title_vi : app.title;
   const description = language === 'vi' ? app.description_vi : app.description;
 
-  const features = language === 'vi' ? [
-    'Giao diện người dùng trực quan và dễ sử dụng',
-    'Hiệu suất cao và tối ưu hóa bộ nhớ',
+  // Use Features Array if available (for future), currently static
+  const basicFeatures = language === 'vi' ? [
+    'Giao diện người dùng trực quan',
+    'Hiệu suất tối ưu hóa',
     'Hỗ trợ đa ngôn ngữ',
-    'Cập nhật tự động miễn phí',
-    'Hỗ trợ kỹ thuật 24/7',
-    'Tích hợp API linh hoạt',
+    'Cập nhật tự động',
+    'Hỗ trợ 24/7',
   ] : [
-    'Intuitive and user-friendly interface',
-    'High performance and memory optimized',
+    'Intuitive interface',
+    'Optimized performance',
     'Multi-language support',
-    'Free automatic updates',
-    '24/7 technical support',
-    'Flexible API integration',
+    'Automatic updates',
+    '24/7 support',
   ];
 
   const stats = [
@@ -78,11 +124,11 @@ const ProductDetail = () => {
   ];
 
   const imageUrl = app.image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop&auto=format';
-  const screenshots = [
-    imageUrl,
-    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=450&fit=crop&auto=format',
-    'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=450&fit=crop&auto=format',
-  ];
+
+  // Use Screenshots from DB or fallback
+  const screenshots = (app.screenshots && app.screenshots.length > 0)
+    ? app.screenshots
+    : [imageUrl, 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=450&fit=crop', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=450&fit=crop'];
 
   const handleMainAction = () => {
     if (app.platform === 'web' && app.url && app.url !== '#') {
@@ -93,6 +139,15 @@ const ProductDetail = () => {
       window.open(app.github_url, '_blank');
     }
   };
+
+  const getVideoId = (url: string | null) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  };
+
+  const videoId = getVideoId(app.video_url);
 
   return (
     <div className="relative min-h-screen overflow-x-hidden">
@@ -154,6 +209,11 @@ const ProductDetail = () => {
                         Featured
                       </Badge>
                     )}
+                    {app.required_subscription && app.required_subscription !== 'Free' && (
+                      <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-xs">
+                        {app.required_subscription}
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -163,9 +223,10 @@ const ProductDetail = () => {
                 <span className="gradient-text">{title.split(' ').slice(-1)}</span>
               </h1>
 
-              <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-                {description}
-              </p>
+              {/* Render Description using Markdown if available, else standard p */}
+              <div className="text-lg text-muted-foreground mb-8 leading-relaxed max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {description && <MarkdownRenderer content={description} />}
+              </div>
 
               {/* Stats */}
               <div className="grid grid-cols-3 gap-4 mb-8">
@@ -227,12 +288,23 @@ const ProductDetail = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="relative"
             >
-              <div className="glass-card neon-border rounded-2xl overflow-hidden">
-                <img
-                  src={screenshots[0]}
-                  alt={`${title} screenshot`}
-                  className="w-full h-auto object-cover"
-                />
+              <div className="glass-card neon-border rounded-2xl overflow-hidden aspect-video">
+                {videoId ? (
+                  <iframe
+                    className="w-full h-full"
+                    src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`}
+                    title="App Video"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
+                ) : (
+                  <img
+                    src={screenshots[0]}
+                    alt={`${title} screenshot`}
+                    className="w-full h-full object-cover"
+                  />
+                )}
               </div>
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
@@ -275,7 +347,7 @@ const ProductDetail = () => {
                   <span className="gradient-text">{language === 'vi' ? 'Nổi Bật' : 'Features'}</span>
                 </h2>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {features.map((feature, index) => (
+                  {basicFeatures.map((feature, index) => (
                     <motion.div
                       key={index}
                       initial={{ opacity: 0, x: -20 }}
@@ -313,12 +385,13 @@ const ProductDetail = () => {
                       viewport={{ once: true }}
                       transition={{ delay: index * 0.1 }}
                       whileHover={{ scale: 1.02, y: -5 }}
-                      className="glass-card neon-border rounded-xl overflow-hidden cursor-pointer"
+                      className="glass-card neon-border rounded-xl overflow-hidden cursor-pointer aspect-video"
+                      onClick={() => window.open(src, '_blank')}
                     >
                       <img
                         src={src}
                         alt={`${title} screenshot ${index + 1}`}
-                        className="w-full h-48 object-cover"
+                        className="w-full h-full object-cover"
                       />
                     </motion.div>
                   ))}
@@ -327,38 +400,76 @@ const ProductDetail = () => {
             </TabsContent>
 
             <TabsContent value="guide">
-              <div className="min-h-[400px] flex flex-col items-center justify-center glass-card rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                  <BookOpen className="w-8 h-8 text-primary" />
+              {app.guide ? (
+                <div className="glass-card rounded-2xl p-8 min-h-[400px]">
+                  <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                    <BookOpen className="w-6 h-6 text-primary" />
+                    {language === 'vi' ? 'Hướng Dẫn Cài Đặt & Sử Dụng' : 'Installation & Usage Guide'}
+                  </h3>
+                  <MarkdownRenderer content={app.guide} />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">
-                  {language === 'vi' ? 'Hướng dẫn chưa có sẵn' : 'Guide Not Available'}
-                </h3>
-                <p className="text-muted-foreground max-w-md">
-                  {language === 'vi'
-                    ? 'Chúng tôi đang biên soạn tài liệu hướng dẫn chi tiết cho sản phẩm này. Vui lòng quay lại sau.'
-                    : 'We are currently working on detailed documentation for this product. Please check back later.'}
-                </p>
-              </div>
+              ) : (
+                <div className="min-h-[400px] flex flex-col items-center justify-center glass-card rounded-2xl p-12 text-center">
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
+                    <BookOpen className="w-8 h-8 text-primary" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">
+                    {language === 'vi' ? 'Hướng dẫn chưa có sẵn' : 'Guide Not Available'}
+                  </h3>
+                  <p className="text-muted-foreground max-w-md">
+                    {language === 'vi'
+                      ? 'Chúng tôi đang biên soạn tài liệu hướng dẫn chi tiết cho sản phẩm này. Vui lòng quay lại sau.'
+                      : 'We are currently working on detailed documentation for this product. Please check back later.'}
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="video">
-              <div className="min-h-[400px] flex flex-col items-center justify-center glass-card rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6">
-                  <Youtube className="w-8 h-8 text-primary" />
+              {videoId ? (
+                <div className="glass-card rounded-2xl p-4 md:p-8 min-h-[500px] flex items-center justify-center bg-black/40">
+                  <div className="w-full max-w-4xl aspect-video rounded-xl overflow-hidden shadow-2xl neon-border">
+                    <iframe
+                      className="w-full h-full"
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title="App Video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
                 </div>
-                <h3 className="text-2xl font-bold mb-2">
-                  {language === 'vi' ? 'Video chưa có sẵn' : 'Video Not Available'}
-                </h3>
-                <p className="text-muted-foreground max-w-md">
-                  {language === 'vi'
-                    ? 'Video giới thiệu và hướng dẫn đang được sản xuất. Hãy đăng ký kênh YouTube của chúng tôi để cập nhật.'
-                    : 'Introduction and tutorial videos are coming soon. Subscribe to our YouTube channel for updates.'}
-                </p>
-                <Button variant="outline" className="mt-6 rounded-full" onClick={() => window.open('https://youtube.com', '_blank')}>
-                  {language === 'vi' ? 'Truy cập YouTube' : 'Visit YouTube'}
-                </Button>
-              </div>
+              ) : (
+                <div className="min-h-[400px] flex flex-col items-center justify-center glass-card rounded-2xl p-12 text-center relative overflow-hidden group hover:neon-border transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  <motion.div
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="w-20 h-20 rounded-full bg-red-600/10 flex items-center justify-center mb-6 relative z-10"
+                  >
+                    <Youtube className="w-10 h-10 text-red-600" />
+                  </motion.div>
+
+                  <h3 className="text-2xl font-bold mb-2 relative z-10">
+                    {language === 'vi' ? 'Xem video hướng dẫn tại DTA TV' : 'Watch Tutorials on DTA TV'}
+                  </h3>
+
+                  <p className="text-muted-foreground max-w-md mb-8 relative z-10">
+                    {language === 'vi'
+                      ? 'Hiện chưa có video riêng cho phần mềm này. Truy cập kênh YouTube chính thức của DTA để xem các hướng dẫn mới nhất.'
+                      : 'Specific video for this app is not available yet. Visit our official YouTube channel for the latest tutorials and guides.'}
+                  </p>
+
+                  <Button
+                    size="lg"
+                    className="rounded-full bg-red-600 hover:bg-red-700 text-white relative z-10 shadow-lg shadow-red-600/20"
+                    onClick={() => window.open('https://www.youtube.com/channel/UC5tB611cewWoBwaczEquAXg/', '_blank')}
+                  >
+                    <Youtube className="w-5 h-5 mr-2" />
+                    {language === 'vi' ? 'Truy Cập Kênh YouTube' : 'Visit YouTube Channel'}
+                  </Button>
+                </div>
+              )}
             </TabsContent>
           </Tabs>
 

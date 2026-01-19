@@ -20,6 +20,11 @@ import { useApps, useUpdateApp, useCreateApp, useDeleteApp, getIconComponent, ty
 import { useLanguage } from '@/contexts/LanguageContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import { generateAppContent } from '@/lib/deepseek';
+import UserTable, { AdminUser } from '@/components/admin/UserTable';
+import UserEditDialog, { WalletUpdateDialog } from '@/components/admin/UserEditDialog';
+import { supabase } from '@/integrations/supabase/client';
+import FileUpload from '@/components/admin/FileUpload';
+import AppFormFullscreen from '@/components/admin/AppFormFullscreen';
 
 const iconOptions = [
   'Monitor', 'Globe', 'Zap', 'MousePointer2', 'Eye', 'Video', 'FileCode', 'Sparkles'
@@ -42,6 +47,34 @@ const AdminPage = () => {
   const [generating, setGenerating] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+
+  // User Management State
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false);
+  const [showWalletDialog, setShowWalletDialog] = useState(false);
+
+  const fetchUsers = async () => {
+    setLoadingUsers(true);
+    try {
+      // @ts-ignore
+      const { data, error } = await supabase.rpc('get_admin_users');
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error: any) {
+      console.error('Error fetching users:', error);
+      toast({ title: 'Failed to fetch users', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     const storedKey = localStorage.getItem('deepseek_api_key');
@@ -225,7 +258,9 @@ const AdminPage = () => {
   const handleSave = async () => {
     try {
       if (isCreating) {
-        await createApp.mutateAsync(formData as any);
+        // Remove 'id' so Supabase generates a new UUID
+        const { id, ...createData } = formData;
+        await createApp.mutateAsync(createData as any);
         toast({ title: texts.success, description: texts.appCreated });
       } else if (editingApp) {
         await updateApp.mutateAsync({ ...formData, id: editingApp.id } as any);
@@ -235,7 +270,24 @@ const AdminPage = () => {
       setIsCreating(false);
       setFormData({});
     } catch (error: any) {
-      toast({ title: texts.error, description: error.message, variant: 'destructive' });
+      let errorMessage = error.message;
+
+      // Localize common errors
+      if (errorMessage.includes('invalid input syntax for type uuid')) {
+        errorMessage = language === 'vi'
+          ? 'Lỗi: ID phải là dạng UUID chuẩn (không được tự đặt tên như "auto-down"). Hệ thống sẽ tự tạo ID.'
+          : 'Error: ID must be a valid UUID. The system will auto-generate it.';
+      } else if (errorMessage.includes('duplicate key')) {
+        errorMessage = language === 'vi'
+          ? 'Lỗi: Dữ liệu bị trùng lặp (có thể do ID hoặc tên).'
+          : 'Error: Duplicate data entry (ID or title).';
+      }
+
+      toast({
+        title: texts.error,
+        description: errorMessage,
+        variant: 'destructive'
+      });
     }
   };
 
@@ -245,7 +297,14 @@ const AdminPage = () => {
       await deleteApp.mutateAsync(id);
       toast({ title: texts.success, description: texts.appDeleted });
     } catch (error: any) {
-      toast({ title: texts.error, description: error.message, variant: 'destructive' });
+      let errorMessage = error.message;
+      // Localize delete errors if needed
+      if (errorMessage.includes('violates foreign key constraint')) {
+        errorMessage = language === 'vi'
+          ? 'Không thể xóa: App này đang được sử dụng bởi user khác.'
+          : 'Cannot delete: This app is in use by other users.';
+      }
+      toast({ title: texts.error, description: errorMessage, variant: 'destructive' });
     }
   };
 
@@ -266,7 +325,7 @@ const AdminPage = () => {
     <div className="relative min-h-screen">
       <AnimatedBackground />
 
-      <div className="relative z-10 px-4 py-8">
+      <div className="relative px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <motion.div
@@ -450,274 +509,102 @@ const AdminPage = () => {
                     )}
                   </motion.div>
 
-                  {/* Edit Form */}
-                  <AnimatePresence mode="wait">
-                    {(editingApp || isCreating) && (
-                      <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        className="glass-card neon-border p-6 rounded-2xl sticky top-8"
-                      >
-                        <div className="flex items-center justify-between mb-6">
-                          <h2 className="text-xl font-bold">
-                            {isCreating ? texts.create : texts.edit}
-                          </h2>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => { setEditingApp(null); setIsCreating(false); }}
-                            className="rounded-lg"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-
-                        <div className="space-y-4 max-h-[calc(100vh-200px)] overflow-y-auto pr-2">
-                          {isCreating && (
-                            <div className="space-y-2">
-                              <Label>ID (slug)</Label>
-                              <Input
-                                value={formData.id || ''}
-                                onChange={(e) => setFormData({ ...formData, id: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
-                                placeholder="my-app"
-                                className="rounded-xl"
-                              />
-                            </div>
-                          )}
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>{texts.appTitle}</Label>
-                              <Input
-                                value={formData.title || ''}
-                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="rounded-xl"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label>{texts.appTitleVi}</Label>
-                              <Input
-                                value={formData.title_vi || ''}
-                                onChange={(e) => setFormData({ ...formData, title_vi: e.target.value })}
-                                className="rounded-xl"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <Label>{texts.description}</Label>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs text-primary"
-                                onClick={() => handleGenerateAI('en')}
-                                disabled={generating}
-                              >
-                                {generating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                                AI Write
-                              </Button>
-                            </div>
-                            <Textarea
-                              value={formData.description || ''}
-                              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                              className="rounded-xl"
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between items-center">
-                              <Label>{texts.descriptionVi}</Label>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-xs text-primary"
-                                onClick={() => handleGenerateAI('vi')}
-                                disabled={generating}
-                              >
-                                {generating ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Sparkles className="w-3 h-3 mr-1" />}
-                                AI Write (VN)
-                              </Button>
-                            </div>
-                            <Textarea
-                              value={formData.description_vi || ''}
-                              onChange={(e) => setFormData({ ...formData, description_vi: e.target.value })}
-                              className="rounded-xl"
-                              rows={3}
-                            />
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label>{texts.platform}</Label>
-                              <Select
-                                value={formData.platform || 'desktop'}
-                                onValueChange={(value) => setFormData({ ...formData, platform: value as 'web' | 'desktop' })}
-                              >
-                                <SelectTrigger className="rounded-xl">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="web">Web</SelectItem>
-                                  <SelectItem value="desktop">Desktop</SelectItem>
-                                </SelectContent>
-                              </Select>
-                            </div>
-                            <div className="space-y-2">
-                              <Label>{texts.icon}</Label>
-                              <Select
-                                value={formData.icon_name || 'Monitor'}
-                                onValueChange={(value) => setFormData({ ...formData, icon_name: value })}
-                              >
-                                <SelectTrigger className="rounded-xl">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {iconOptions.map((icon) => (
-                                    <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>{texts.categories}</Label>
-                            <div className="flex flex-wrap gap-2">
-                              {['web', 'desktop', 'automation'].map((cat) => (
-                                <label key={cat} className="flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="checkbox"
-                                    checked={formData.categories?.includes(cat)}
-                                    onChange={(e) => handleCategoryChange(cat, e.target.checked)}
-                                    className="rounded"
-                                  />
-                                  <span className="text-sm">{cat}</span>
-                                </label>
-                              ))}
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                              <ExternalLink className="w-4 h-4" />
-                              {texts.url}
-                            </Label>
-                            <Input
-                              value={formData.url || ''}
-                              onChange={(e) => setFormData({ ...formData, url: e.target.value })}
-                              placeholder="https://..."
-                              className="rounded-xl"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                              <Github className="w-4 h-4" />
-                              {texts.githubUrl}
-                              {formData.github_url && (
-                                <Badge variant={formData.github_url.includes('github.com') ? 'default' : 'destructive'} className="text-[10px] h-4">
-                                  {formData.github_url.includes('github.com') ? 'Valid Domain' : 'Invalid'}
-                                </Badge>
-                              )}
-                            </Label>
-                            <div className="flex gap-2">
-                              <Input
-                                value={formData.github_url || ''}
-                                onChange={(e) => setFormData({ ...formData, github_url: e.target.value })}
-                                placeholder="https://github.com/username/repo"
-                                className="rounded-xl flex-1"
-                              />
-                            </div>
-                            <p className="text-[10px] text-muted-foreground">
-                              Enter the full URL to the public repository. The latest release will be fetched automatically.
-                            </p>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label className="flex items-center gap-2">
-                              <Download className="w-4 h-4" />
-                              {texts.downloadUrl}
-                            </Label>
-                            <Input
-                              value={formData.download_url || ''}
-                              onChange={(e) => setFormData({ ...formData, download_url: e.target.value })}
-                              placeholder="https://..."
-                              className="rounded-xl"
-                            />
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label>{texts.imageUrl}</Label>
-                            <Input
-                              value={formData.image_url || ''}
-                              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                              placeholder="https://..."
-                              className="rounded-xl"
-                            />
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={formData.featured || false}
-                                onCheckedChange={(checked) => setFormData({ ...formData, featured: checked })}
-                              />
-                              <Label>{texts.featured}</Label>
-                            </div>
-                            {!isCreating && (
-                              <div className="flex items-center gap-2">
-                                <Switch
-                                  checked={formData.is_active ?? true}
-                                  onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-                                />
-                                <Label>{texts.active}</Label>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="flex gap-3 pt-4">
-                            <Button
-                              onClick={handleSave}
-                              className="flex-1 btn-neon rounded-xl text-background"
-                              disabled={updateApp.isPending || createApp.isPending}
-                            >
-                              {(updateApp.isPending || createApp.isPending) ? (
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                              ) : (
-                                <Save className="w-4 h-4 mr-2" />
-                              )}
-                              {isCreating ? texts.create : texts.save}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              onClick={() => { setEditingApp(null); setIsCreating(false); }}
-                              className="rounded-xl"
-                            >
-                              {texts.cancel}
-                            </Button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Old Edit Form removed - using AppFormFullscreen instead */}
                 </div>
               </TabsContent>
 
               <TabsContent value="users">
-                <div className="glass-card p-8 rounded-xl text-center">
-                  <Users className="w-16 h-16 mx-auto text-muted-foreground mb-4 opacity-50" />
-                  <h3 className="text-xl font-bold mb-2">User Management System</h3>
-                  <p className="text-muted-foreground mb-6">This module is currently under development. It will verify users and manage licenses.</p>
-                  <Button variant="outline" disabled>Coming Soon</Button>
+                <div className="glass-card p-6 rounded-xl">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-bold">User Management</h2>
+                    <Button variant="outline" size="sm" onClick={fetchUsers} disabled={loadingUsers}>
+                      {loadingUsers ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Refresh List'}
+                    </Button>
+                  </div>
+
+                  <UserTable
+                    users={users}
+                    loading={loadingUsers}
+                    onEdit={(user) => {
+                      setSelectedUser(user);
+                      setShowEditUserDialog(true);
+                    }}
+                    onUpdateWallet={(user) => {
+                      setSelectedUser(user);
+                      setShowWalletDialog(true);
+                    }}
+                  />
                 </div>
+
+                <UserEditDialog
+                  user={selectedUser}
+                  isOpen={showEditUserDialog}
+                  onClose={() => setShowEditUserDialog(false)}
+                  onSuccess={fetchUsers}
+                />
+
+                <WalletUpdateDialog
+                  user={selectedUser}
+                  isOpen={showWalletDialog}
+                  onClose={() => setShowWalletDialog(false)}
+                  onSuccess={fetchUsers}
+                />
               </TabsContent>
             </Tabs>
           </div>
         </div>
       </div>
+
+      {/* Fullscreen App Form */}
+      <AppFormFullscreen
+        isOpen={editingApp !== null || isCreating}
+        isCreating={isCreating}
+        initialData={formData}
+        onSave={async (data) => {
+          try {
+            if (isCreating) {
+              // Remove 'id' so Supabase generates a new UUID
+              const { id, ...createData } = data;
+              await createApp.mutateAsync(createData as any);
+              toast({ title: texts.success, description: texts.appCreated });
+            } else if (editingApp) {
+              await updateApp.mutateAsync({ ...data, id: editingApp.id } as any);
+              toast({ title: texts.success, description: texts.appUpdated });
+            }
+            setEditingApp(null);
+            setIsCreating(false);
+            setFormData({});
+          } catch (error: any) {
+            let errorMessage = error.message;
+
+            // Localize common errors
+            if (errorMessage.includes('invalid input syntax for type uuid')) {
+              errorMessage = language === 'vi'
+                ? 'Lỗi: ID phải là dạng UUID chuẩn (không được tự đặt tên như "auto-down"). Hệ thống sẽ tự tạo ID.'
+                : 'Error: ID must be a valid UUID. The system will auto-generate it.';
+            } else if (errorMessage.includes('duplicate key')) {
+              errorMessage = language === 'vi'
+                ? 'Lỗi: Dữ liệu bị trùng lặp (có thể do ID hoặc tên).'
+                : 'Error: Duplicate data entry (ID or title).';
+            } else if (errorMessage.includes('violates row-level security policy')) {
+              errorMessage = language === 'vi'
+                ? 'Lỗi Quyền: Bạn cần chạy lệnh SQL cấp quyền Admin trong Supabase.'
+                : 'Permission Error: You need to run the SQL grant command in Supabase.';
+            }
+
+            toast({
+              title: texts.error,
+              description: errorMessage,
+              variant: 'destructive'
+            });
+          }
+        }}
+        onClose={() => {
+          setEditingApp(null);
+          setIsCreating(false);
+        }}
+        saving={updateApp.isPending || createApp.isPending}
+      />
     </div>
   );
 };

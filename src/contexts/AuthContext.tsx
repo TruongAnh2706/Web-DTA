@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         // Set up auth state listener BEFORE checking session
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                console.log('Auth State Change (Context):', event);
+
                 const user = session?.user ?? null;
 
                 // Check admin role
@@ -55,14 +55,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                                 .eq('user_id', user.id)
                                 .eq('role', 'admin')
                                 .maybeSingle();
-                            if (error) throw error;
+                            // Ignore errors (table may not exist) - just return null
+                            if (error) {
+                                console.warn('user_roles table error (may not exist):', error.message);
+                                return null;
+                            }
                             return roles;
                         };
 
                         const roles = await Promise.race([
                             checkRole(),
                             new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error('Role check timeout')), 2000)
+                                setTimeout(() => reject(new Error('Role check timeout')), 10000)
                             )
                         ]);
 
@@ -96,16 +100,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         let mounted = true;
 
         // Safety timeout to prevent infinite loading
-        const safetyTimeout = setTimeout(() => {
-            if (mounted) {
-                console.warn('Auth check timed out, forcing loading: false');
-                setAuthState(prev => ({ ...prev, loading: false }));
-            }
-        }, 5000);
+        // Safety timeout removed as per user request to avoid auto-logout
+        // const safetyTimeout = setTimeout(() => { ... });
 
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (!mounted) return;
-            clearTimeout(safetyTimeout);
+            // clearTimeout(safetyTimeout); // Removed
             console.log('Get Session Result (Context):', session ? 'Found Session' : 'No Session');
 
             const user = session?.user ?? null;
@@ -120,14 +120,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                             .eq('user_id', user.id)
                             .eq('role', 'admin')
                             .maybeSingle();
-                        if (error) throw error;
+                        // Ignore errors (table may not exist) - just return null
+                        if (error) {
+                            console.warn('user_roles table error (may not exist):', error.message);
+                            return null;
+                        }
                         return roles;
                     };
 
                     const roles = await Promise.race([
                         checkRole(),
                         new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('Role check timeout')), 2000)
+                            setTimeout(() => reject(new Error('Role check timeout')), 10000)
                         )
                     ]);
 
@@ -163,7 +167,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => {
             mounted = false;
-            clearTimeout(safetyTimeout);
+            // clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
     }, []);
@@ -204,7 +208,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-                redirectTo: window.location.origin,
+                redirectTo: `${window.location.origin}/`,
+                queryParams: {
+                    access_type: 'offline',
+                    prompt: 'consent',
+                },
             }
         });
         return { data, error };
