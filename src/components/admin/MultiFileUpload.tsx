@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Loader2, Plus, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -29,6 +29,13 @@ const MultiFileUpload = ({
     const [urls, setUrls] = useState<string[]>(currentUrls || []);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { toast } = useToast();
+
+    // Sync state with props
+    useEffect(() => {
+        if (currentUrls) {
+            setUrls(currentUrls);
+        }
+    }, [currentUrls]);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
