@@ -95,12 +95,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         let mounted = true;
 
         // Safety timeout to prevent infinite loading
-        // Safety timeout removed as per user request to avoid auto-logout
-        // const safetyTimeout = setTimeout(() => { ... });
+        const safetyTimeout = setTimeout(() => {
+            console.warn('[Auth] Session check timed out, forcing load completion');
+            if (mounted) {
+                setAuthState(prev => ({ ...prev, loading: false }));
+            }
+        }, 3000);
 
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (!mounted) return;
-            // clearTimeout(safetyTimeout); // Removed
+            clearTimeout(safetyTimeout);
             console.log('Get Session Result (Context):', session ? 'Found Session' : 'No Session');
 
             const user = session?.user ?? null;
@@ -149,6 +153,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 subscriptionLevel,
             });
         }).catch(err => {
+            clearTimeout(safetyTimeout);
             console.error('Get Session Error:', err);
             if (mounted) {
                 setAuthState(prev => ({ ...prev, loading: false }));
@@ -157,7 +162,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         return () => {
             mounted = false;
-            // clearTimeout(safetyTimeout);
+            clearTimeout(safetyTimeout);
             subscription.unsubscribe();
         };
     }, []);
