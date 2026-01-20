@@ -1,5 +1,4 @@
-// @ts-nocheck
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 
@@ -85,20 +84,22 @@ export const useDashboard = () => {
         setError(null);
 
         try {
+            // Note: These tables may not exist yet in DB schema
+            // Using 'as any' to bypass TypeScript until tables are created
+
             // 1. Fetch Wallet
-            const { data: walletData, error: walletError } = await supabase
+            const { data: walletData, error: walletError } = await (supabase as any)
                 .from('user_wallets')
                 .select('balance')
                 .eq('user_id', user.id)
                 .maybeSingle();
 
             if (walletError) {
-                // If table doesn't exist or error, throw to trigger catch and use mock
                 throw walletError;
             }
 
             // 2. Fetch Transactions
-            const { data: txData, error: txError } = await supabase
+            const { data: txData, error: txError } = await (supabase as any)
                 .from('transactions')
                 .select('*')
                 .eq('user_id', user.id)
@@ -107,9 +108,7 @@ export const useDashboard = () => {
             if (txError) throw txError;
 
             // 3. Fetch Licenses
-            // Note: This requires complex join, simplifying for now or assumes view
-            // For this implementation, we will try to fetch from a view or raw table
-            const { data: licData, error: licError } = await supabase
+            const { data: licData, error: licError } = await (supabase as any)
                 .from('licenses')
                 .select('*, app:apps(title, icon_name)')
                 .eq('user_id', user.id)
@@ -119,8 +118,8 @@ export const useDashboard = () => {
 
             setData({
                 wallet: walletData || { balance: 0 },
-                transactions: txData || [],
-                licenses: licData || [],
+                transactions: (txData as Transaction[]) || [],
+                licenses: (licData as License[]) || [],
             });
             setUsingMock(false);
 

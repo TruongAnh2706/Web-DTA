@@ -229,6 +229,13 @@
   .btn-neon:hover::before {
     left: 100%;
   }
+
+  /* GPU acceleration hints for animations */
+  .gpu-accelerated {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
 }
 
 /* Animated background gradient */

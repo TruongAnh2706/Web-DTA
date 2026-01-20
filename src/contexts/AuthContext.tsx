@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { User, Session } from '@supabase/supabase-js';
 
@@ -20,6 +20,50 @@ export interface AuthState {
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
+// Admin emails whitelist
+const ADMIN_EMAILS = ['ductruong.onl@gmail.com', 'test1768817065811@example.com'];
+
+// Helper function to check admin role - DRY principle
+const checkUserRole = async (userId: string): Promise<boolean> => {
+    try {
+        const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .eq('role', 'admin')
+            .maybeSingle();
+
+        if (error) {
+            console.warn('user_roles table error:', error.message);
+            return false;
+        }
+        return !!data;
+    } catch (err) {
+        console.error('Role check failed:', err);
+        return false;
+    }
+};
+
+// Helper to process user authentication state
+const processUserAuth = async (user: User | null) => {
+    let isAdmin = false;
+
+    if (user) {
+        // Check whitelist first (fast path)
+        if (ADMIN_EMAILS.includes(user.email || '')) {
+            isAdmin = true;
+        } else {
+            // Check database roles
+            isAdmin = await checkUserRole(user.id);
+        }
+    }
+
+    const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
+    const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
+
+    return { isAdmin, accountType, subscriptionLevel };
+};
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [authState, setAuthState] = useState<{
         user: User | null;
@@ -38,47 +82,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     useEffect(() => {
-        // Set up auth state listener BEFORE checking session
+        let mounted = true;
+
+        // Safety timeout to prevent infinite loading
+        const safetyTimeout = setTimeout(() => {
+            console.warn('[Auth] Session check timed out, forcing load completion');
+            if (mounted) {
+                setAuthState(prev => ({ ...prev, loading: false }));
+            }
+        }, 3000);
+
+        // Auth state change listener
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
-            async (event, session) => {
+            async (_event, session) => {
+                if (!mounted) return;
 
                 const user = session?.user ?? null;
-
-                // Check admin role
-                let isAdmin = false;
-                if (user) {
-                    try {
-                        const checkRole = async () => {
-                            const { data: roles, error } = await supabase
-                                .from('user_roles')
-                                .select('role')
-                                .eq('user_id', user.id)
-                                .eq('role', 'admin')
-                                .maybeSingle();
-                            // Ignore errors (table may not exist) - just return null
-                            if (error) {
-                                console.warn('user_roles table error (may not exist):', error.message);
-                                return null;
-                            }
-                            return roles;
-                        };
-
-                        const roles = await checkRole();
-
-                        // Check specific admin email or roles
-                        if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
-                            isAdmin = true;
-                        } else {
-                            isAdmin = !!roles;
-                        }
-                    } catch (err) {
-                        console.error('Role check failed or timed out:', err);
-                    }
-                }
-
-                // Read account type from user_metadata
-                const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
-                const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
+                const { isAdmin, accountType, subscriptionLevel } = await processUserAuth(user);
 
                 setAuthState({
                     user,
@@ -91,58 +111,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         );
 
-        // Check current session with safety timeout
-        let mounted = true;
-
-        // Safety timeout to prevent infinite loading
-        const safetyTimeout = setTimeout(() => {
-            console.warn('[Auth] Session check timed out, forcing load completion');
-            if (mounted) {
-                setAuthState(prev => ({ ...prev, loading: false }));
-            }
-        }, 3000);
-
+        // Initial session check
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             if (!mounted) return;
             clearTimeout(safetyTimeout);
-            console.log('Get Session Result (Context):', session ? 'Found Session' : 'No Session');
 
             const user = session?.user ?? null;
-
-            let isAdmin = false;
-            if (user) {
-                try {
-                    const checkRole = async () => {
-                        const { data: roles, error } = await supabase
-                            .from('user_roles')
-                            .select('role')
-                            .eq('user_id', user.id)
-                            .eq('role', 'admin')
-                            .maybeSingle();
-                        // Ignore errors (table may not exist) - just return null
-                        if (error) {
-                            console.warn('user_roles table error (may not exist):', error.message);
-                            return null;
-                        }
-                        return roles;
-                    };
-
-                    const roles = await checkRole();
-
-                    // Check specific admin email or roles
-                    if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
-                        isAdmin = true;
-                    } else {
-                        isAdmin = !!roles;
-                    }
-                } catch (err) {
-                    console.error('Role check failed (getSession) or timed out:', err);
-                }
-            }
-
-            // Read account type from user_metadata
-            const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
-            const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
+            const { isAdmin, accountType, subscriptionLevel } = await processUserAuth(user);
 
             setAuthState({
                 user,

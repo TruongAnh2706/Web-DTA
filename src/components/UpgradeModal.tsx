@@ -85,18 +85,18 @@ const UpgradeModal = ({ isOpen, onClose, requiredLevel }: UpgradeModalProps) => 
                                 {/* Contact Options */}
                                 <div className="space-y-3">
                                     <a
-                                        href="tel:09662775506"
+                                        href="tel:0962775506"
                                         className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 hover:bg-primary/20 transition-colors"
                                     >
                                         <Phone className="w-5 h-5 text-primary" />
                                         <div>
                                             <div className="text-sm text-muted-foreground">{texts.phone}</div>
-                                            <div className="font-bold">0966 277 506</div>
+                                            <div className="font-bold">0962 775 506</div>
                                         </div>
                                     </a>
 
                                     <a
-                                        href="https://zalo.me/09662775506"
+                                        href="https://zalo.me/0962775506"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="flex items-center gap-3 p-4 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 transition-colors"

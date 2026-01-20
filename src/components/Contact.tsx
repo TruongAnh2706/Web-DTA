@@ -120,13 +120,13 @@ const Contact = () => {
                   </div>
                 </a>
 
-                <a href="tel:09662775506" className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/5 transition-colors group">
+                <a href="tel:0962775506" className="flex items-center gap-4 p-4 rounded-xl hover:bg-primary/5 transition-colors group">
                   <div className="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center text-accent group-hover:scale-110 transition-transform">
                     <Phone className="w-6 h-6" />
                   </div>
                   <div>
                     <div className="text-sm text-muted-foreground">Hotline</div>
-                    <div className="text-lg font-bold">0966 277 506</div>
+                    <div className="text-lg font-bold">0962 775 506</div>
                   </div>
                 </a>
 
@@ -147,7 +147,7 @@ const Contact = () => {
                   {[
                     { Icon: Facebook, href: "https://www.facebook.com/phamductruong17/" },
                     { Icon: Github, href: "https://github.com/TruongAnh2706" },
-                    { Icon: MessageCircle, href: "https://zalo.me/09662775506" }
+                    { Icon: MessageCircle, href: "https://zalo.me/0962775506" }
                   ].map(({ Icon, href }, i) => (
                     <motion.a
                       key={i}

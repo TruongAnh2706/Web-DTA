@@ -9,13 +9,16 @@ const AnimatedBackground = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d', { alpha: true }); // Optimized context
+    const ctx = canvas.getContext('2d', {
+      alpha: true,
+      willReadFrequently: false, // Hint for write-optimized operations
+    });
     if (!ctx) return;
 
     let animationFrameId: number;
     let particles: Particle[] = [];
     let lastTime = 0;
-    const fps = 30; // Limit to 30 FPS for performance
+    const fps = 60; // Tăng lên 60 FPS cho animation mượt mà hơn
     const interval = 1000 / fps;
     let isVisible = true;
 
@@ -45,14 +48,25 @@ const AnimatedBackground = () => {
       speedY: number;
       opacity: number;
       color: string;
+      depth: number; // Thêm depth để tạo chiều sâu
 
       constructor() {
         this.x = Math.random() * (canvas?.width || window.innerWidth);
         this.y = Math.random() * (canvas?.height || window.innerHeight);
-        this.size = Math.random() * 4 + 2; // Increased size: 2-6px (was 0.5-2.5px) // Increased size: 2-6px (was 1-3px)
-        this.speedX = (Math.random() - 0.5) * 0.2; // Slower speed
-        this.speedY = (Math.random() - 0.5) * 0.2;
-        this.opacity = Math.random() * 0.5 + 0.1;
+
+        // Depth từ 0-1: 0 = xa (chậm, nhỏ, mờ), 1 = gần (nhanh, lớn, sáng)
+        this.depth = Math.random();
+
+        // Size dựa trên depth: 2-6px
+        this.size = 2 + this.depth * 4;
+
+        // Tốc độ dựa trên depth: 0.3-0.9 (tăng 4x so với trước)
+        const baseSpeed = 0.3 + this.depth * 0.6;
+        this.speedX = (Math.random() - 0.5) * baseSpeed * 2;
+        this.speedY = (Math.random() - 0.5) * baseSpeed * 2;
+
+        // Opacity dựa trên depth: 0.15-0.65
+        this.opacity = 0.15 + this.depth * 0.5;
         this.color = Math.random() > 0.5 ? '185, 100%, 55%' : '355, 100%, 60%';
       }
 
