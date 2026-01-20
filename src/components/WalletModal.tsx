@@ -98,12 +98,16 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                 {showQR ? (
                                     <div className="text-center space-y-4">
                                         <div className="w-48 h-48 mx-auto bg-white p-2 rounded-xl">
-                                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=00020101021238570010A00000072701270006970425011319036324830150208QRIBFTTA53037045802VN6304CA77" alt="VietQR" className="w-full h-full" />
+                                            <img
+                                                src={`https://img.vietqr.io/image/vib-995992999-compact.png?amount=${amount}&addInfo=NAP ${amount}&accountName=Pham Duc Truong`}
+                                                alt="VietQR"
+                                                className="w-full h-full object-contain"
+                                            />
                                         </div>
                                         <div className="text-sm">
-                                            <p className="font-bold text-primary">Ngân hàng TMCP Việt Nam</p>
-                                            <p>STK: <span className="font-mono">1903632483015</span></p>
-                                            <p>Chủ TK: DTA STUDIO</p>
+                                            <p className="font-bold text-primary">Ngân hàng Quốc tế VIB</p>
+                                            <p>STK: <span className="font-mono">995992999</span></p>
+                                            <p>Chủ TK: Phạm Đức Trường</p>
                                             <p className="text-xs text-muted-foreground mt-2">Nội dung: <span className="font-mono font-bold text-accent">NAP {(parseInt(amount) || 0)}</span></p>
                                         </div>
                                         <Button variant="outline" onClick={() => setShowQR(false)} className="w-full">
