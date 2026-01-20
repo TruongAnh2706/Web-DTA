@@ -11,6 +11,7 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { toast } from 'sonner';
 
 // Simple Markdown Renderer Component
@@ -65,6 +66,7 @@ const ProductDetail = () => {
   const { language, t } = useLanguage();
   const { data: app, isLoading, error } = useApp(id || '');
   const { session } = useAuthContext();
+  const { addToHistory } = useDownloadHistory();
   const navigate = useNavigate();
 
   const handleAuthAction = (callback: () => void) => {
@@ -145,6 +147,13 @@ const ProductDetail = () => {
 
   const handleMainAction = () => {
     handleAuthAction(() => {
+      // Save to local history
+      addToHistory({
+        id: app.id,
+        title: language === 'vi' ? app.title_vi : app.title,
+        icon_name: app.icon_name
+      }, app.platform === 'web' ? 'launch' : 'download');
+
       if (app.platform === 'web' && app.url && app.url !== '#') {
         window.open(app.url, '_blank');
       } else if (app.download_url) {

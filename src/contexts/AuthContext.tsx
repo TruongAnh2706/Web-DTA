@@ -63,12 +63,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                             return roles;
                         };
 
-                        const roles = await Promise.race([
-                            checkRole(),
-                            new Promise((_, reject) =>
-                                setTimeout(() => reject(new Error('Role check timeout')), 10000)
-                            )
-                        ]);
+                        const roles = await checkRole();
 
                         // Check specific admin email or roles
                         if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
@@ -128,12 +123,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         return roles;
                     };
 
-                    const roles = await Promise.race([
-                        checkRole(),
-                        new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('Role check timeout')), 10000)
-                        )
-                    ]);
+                    const roles = await checkRole();
 
                     // Check specific admin email or roles
                     if (user.email === 'ductruong.onl@gmail.com' || user.email === 'test1768817065811@example.com') {
@@ -178,12 +168,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             password,
         });
 
-        const { data, error } = await Promise.race([
-            signInPromise,
-            new Promise<{ data: any; error: any }>((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 10000)
-            )
-        ]).catch(err => ({ data: null, error: err }));
+        const { data, error } = await signInPromise;
 
         return { data, error };
     };

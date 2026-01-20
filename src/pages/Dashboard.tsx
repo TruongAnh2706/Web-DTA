@@ -25,6 +25,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboard, Transaction, License } from '@/hooks/useDashboard';
+import { useDownloadHistory } from '@/hooks/useDownloadHistory';
 import { getIconComponent } from '@/hooks/useApps';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -34,6 +35,7 @@ const Dashboard = () => {
     const { data, loading: dataLoading, usingMock } = useDashboard();
     const { toast } = useToast();
     const { language } = useLanguage();
+    const { history } = useDownloadHistory();
 
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
@@ -234,37 +236,51 @@ const Dashboard = () => {
                                     <table className="w-full">
                                         <thead>
                                             <tr className="border-b border-primary/20 bg-primary/5">
-                                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</th>
-                                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</th>
-                                                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Amount</th>
-                                                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">{language === 'vi' ? 'Ứng dụng' : 'Application'}</th>
+                                                <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground">{language === 'vi' ? 'Loại' : 'Action Type'}</th>
+                                                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">{language === 'vi' ? 'Thời gian' : 'Date'}</th>
+                                                <th className="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">{language === 'vi' ? 'Hành động' : 'Action'}</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-primary/10">
-                                            {data?.transactions.map((tx) => (
-                                                <tr key={tx.id} className="hover:bg-primary/5 transition-colors">
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                                                        {new Date(tx.created_at).toLocaleDateString()}
-                                                    </td>
-                                                    <td className="px-6 py-4 text-sm font-medium">
-                                                        {tx.description}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                                        <Badge variant="secondary" className="capitalize">
-                                                            {tx.type}
-                                                        </Badge>
-                                                    </td>
-                                                    <td className={`px-6 py-4 whitespace-nowrap text-sm font-bold text-right ${tx.amount > 0 ? 'text-green-500' : 'text-red-500'}`}>
-                                                        {tx.amount > 0 ? '+' : ''}${tx.amount.toFixed(2)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-right">
-                                                        <Badge variant="outline" className={tx.status === 'completed' ? 'border-green-500 text-green-500' : 'border-yellow-500 text-yellow-500'}>
-                                                            {tx.status}
-                                                        </Badge>
+                                            {history.length > 0 ? (
+                                                history.map((item) => {
+                                                    const Icon = getIconComponent(item.icon_name);
+                                                    return (
+                                                        <tr key={`${item.id}-${item.timestamp}`} className="hover:bg-primary/5 transition-colors">
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-lg gradient-neon flex items-center justify-center">
+                                                                    <Icon className="w-4 h-4 text-background" />
+                                                                </div>
+                                                                <Link to={`/app/${item.id}`} className="hover:text-primary font-bold transition-colors">
+                                                                    {item.title}
+                                                                </Link>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                                                <Badge variant="secondary" className="capitalize">
+                                                                    {item.action_type}
+                                                                </Badge>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-muted-foreground">
+                                                                {new Date(item.timestamp).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                                <Link to={`/app/${item.id}`}>
+                                                                    <Button size="sm" variant="ghost" className="hover:text-primary">
+                                                                        <Download className="w-4 h-4" />
+                                                                    </Button>
+                                                                </Link>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                                                        {language === 'vi' ? 'Chưa có lịch sử tải xuống.' : 'No download history found.'}
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>

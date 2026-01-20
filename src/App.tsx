@@ -19,7 +19,14 @@ const Dashboard = lazy(() => import("./pages/Dashboard"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const WebTools = lazy(() => import("./pages/WebTools"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      retry: 1,
+    },
+  },
+});
 
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
