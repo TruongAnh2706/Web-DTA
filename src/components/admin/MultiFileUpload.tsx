@@ -93,9 +93,9 @@ const MultiFileUpload = ({
 
             toast({ title: 'Thành công', description: `Đã upload thêm ${newUrls.length} ảnh!` });
 
-        } catch (err: any) {
+        } catch (err) {
             console.error('Upload error:', err);
-            toast({ title: 'Lỗi upload', description: err.message, variant: 'destructive' });
+            toast({ title: 'Lỗi upload', description: err instanceof Error ? err.message : 'Unknown error', variant: 'destructive' });
         } finally {
             setUploading(false);
             if (fileInputRef.current) fileInputRef.current.value = '';

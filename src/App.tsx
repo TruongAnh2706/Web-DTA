@@ -22,11 +22,15 @@ const WebTools = lazy(() => import("./pages/WebTools"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 10 * 60 * 1000, // 10 minutes - tăng từ 5 phút
+      gcTime: 15 * 60 * 1000, // 15 minutes - cache lâu hơn
       retry: 1,
+      refetchOnWindowFocus: false, // Tắt refetch khi focus window
+      refetchOnReconnect: false, // Tắt refetch khi reconnect
     },
   },
 });
+
 
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">

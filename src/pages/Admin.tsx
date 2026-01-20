@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -55,26 +55,26 @@ const AdminPage = () => {
   const [showEditUserDialog, setShowEditUserDialog] = useState(false);
   const [showWalletDialog, setShowWalletDialog] = useState(false);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoadingUsers(true);
     try {
-      // @ts-ignore
+      // @ts-expect-error RPC type definition is missing in supabase types
       const { data, error } = await supabase.rpc('get_admin_users');
       if (error) throw error;
-      setUsers(data || []);
-    } catch (error: any) {
+      setUsers((data as AdminUser[]) || []);
+    } catch (error) {
       console.error('Error fetching users:', error);
-      toast({ title: 'Failed to fetch users', description: error.message, variant: 'destructive' });
+      toast({ title: 'Failed to fetch users', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
     } finally {
       setLoadingUsers(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     if (isAdmin) {
       fetchUsers();
     }
-  }, [isAdmin]);
+  }, [isAdmin, fetchUsers]);
 
   useEffect(() => {
     const storedKey = localStorage.getItem('deepseek_api_key');
@@ -101,8 +101,9 @@ const AdminPage = () => {
     setGenerating(true);
     try {
       const content = await generateAppContent(
-        formData.title,
+        formData.title || '',
         lang === 'vi' ? formData.description_vi || '' : formData.description || '',
+        'apple',
         lang,
         apiKey
       );
@@ -113,8 +114,8 @@ const AdminPage = () => {
         setFormData(prev => ({ ...prev, description: content }));
       }
       toast({ title: 'Content Generated Successfully' });
-    } catch (error: any) {
-      toast({ title: 'Generation Failed', description: error.message, variant: 'destructive' });
+    } catch (error) {
+      toast({ title: 'Generation Failed', description: error instanceof Error ? error.message : 'Unknown error', variant: 'destructive' });
     } finally {
       setGenerating(false);
     }
@@ -258,19 +259,18 @@ const AdminPage = () => {
   const handleSave = async () => {
     try {
       if (isCreating) {
-        // Remove 'id' so Supabase generates a new UUID
         const { id, ...createData } = formData;
-        await createApp.mutateAsync(createData as any);
+        await createApp.mutateAsync(createData as unknown as Omit<AppData, 'created_at' | 'updated_at' | 'is_active'>);
         toast({ title: texts.success, description: texts.appCreated });
       } else if (editingApp) {
-        await updateApp.mutateAsync({ ...formData, id: editingApp.id } as any);
+        await updateApp.mutateAsync({ ...formData, id: editingApp.id } as unknown as Partial<AppData> & { id: string });
         toast({ title: texts.success, description: texts.appUpdated });
       }
       setEditingApp(null);
       setIsCreating(false);
       setFormData({});
-    } catch (error: any) {
-      let errorMessage = error.message;
+    } catch (error) {
+      let errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
       // Localize common errors
       if (errorMessage.includes('invalid input syntax for type uuid')) {
@@ -296,8 +296,8 @@ const AdminPage = () => {
     try {
       await deleteApp.mutateAsync(id);
       toast({ title: texts.success, description: texts.appDeleted });
-    } catch (error: any) {
-      let errorMessage = error.message;
+    } catch (error) {
+      let errorMessage = error instanceof Error ? error.message : 'Unknown error';
       // Localize delete errors if needed
       if (errorMessage.includes('violates foreign key constraint')) {
         errorMessage = language === 'vi'
@@ -565,17 +565,17 @@ const AdminPage = () => {
             if (isCreating) {
               // Remove 'id' so Supabase generates a new UUID
               const { id, ...createData } = data;
-              await createApp.mutateAsync(createData as any);
+              await createApp.mutateAsync(createData as unknown as Omit<AppData, 'created_at' | 'updated_at' | 'is_active'>);
               toast({ title: texts.success, description: texts.appCreated });
             } else if (editingApp) {
-              await updateApp.mutateAsync({ ...data, id: editingApp.id } as any);
+              await updateApp.mutateAsync({ ...data, id: editingApp.id } as unknown as Partial<AppData> & { id: string });
               toast({ title: texts.success, description: texts.appUpdated });
             }
             setEditingApp(null);
             setIsCreating(false);
             setFormData({});
-          } catch (error: any) {
-            let errorMessage = error.message;
+          } catch (error) {
+            let errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
             // Localize common errors
             if (errorMessage.includes('invalid input syntax for type uuid')) {
