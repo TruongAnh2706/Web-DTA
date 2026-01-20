@@ -215,6 +215,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
             }
         });
+        console.log('[Auth] Redirecting to:', `${window.location.origin}/`);
         return { data, error };
     };
 

@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowLeft, ExternalLink, Download, Globe, Monitor, Star, Check, Zap, Shield, Clock, Github, Loader2, BookOpen, Youtube, Layout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useAuthContext } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 // Simple Markdown Renderer Component
 const MarkdownRenderer = ({ content }: { content: string }) => {
@@ -62,6 +64,17 @@ const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const { language, t } = useLanguage();
   const { data: app, isLoading, error } = useApp(id || '');
+  const { session } = useAuthContext();
+  const navigate = useNavigate();
+
+  const handleAuthAction = (callback: () => void) => {
+    if (!session) {
+      toast.error(language === 'vi' ? 'Vui lòng đăng nhập để sử dụng tính năng này' : 'Please login to use this feature');
+      navigate('/auth');
+      return;
+    }
+    callback();
+  };
 
   if (isLoading) {
     return (
@@ -131,13 +144,15 @@ const ProductDetail = () => {
     : [imageUrl, 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=450&fit=crop', 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800&h=450&fit=crop'];
 
   const handleMainAction = () => {
-    if (app.platform === 'web' && app.url && app.url !== '#') {
-      window.open(app.url, '_blank');
-    } else if (app.download_url) {
-      window.open(app.download_url, '_blank');
-    } else if (app.github_url) {
-      window.open(app.github_url, '_blank');
-    }
+    handleAuthAction(() => {
+      if (app.platform === 'web' && app.url && app.url !== '#') {
+        window.open(app.url, '_blank');
+      } else if (app.download_url) {
+        window.open(app.download_url, '_blank');
+      } else if (app.github_url) {
+        window.open(app.github_url, '_blank');
+      }
+    });
   };
 
   const getVideoId = (url: string | null) => {
@@ -463,7 +478,7 @@ const ProductDetail = () => {
                   <Button
                     size="lg"
                     className="rounded-full bg-red-600 hover:bg-red-700 text-white relative z-10 shadow-lg shadow-red-600/20"
-                    onClick={() => window.open('https://www.youtube.com/channel/UC5tB611cewWoBwaczEquAXg/', '_blank')}
+                    onClick={() => handleAuthAction(() => window.open('https://www.youtube.com/channel/UC5tB611cewWoBwaczEquAXg/', '_blank'))}
                   >
                     <Youtube className="w-5 h-5 mr-2" />
                     {language === 'vi' ? 'Truy Cập Kênh YouTube' : 'Visit YouTube Channel'}
