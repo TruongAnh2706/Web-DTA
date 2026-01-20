@@ -154,12 +154,23 @@ const ProductDetail = () => {
         icon_name: app.icon_name
       }, app.platform === 'web' ? 'launch' : 'download');
 
+      const downloadUrl = app.download_url || app.github_url;
+
       if (app.platform === 'web' && app.url && app.url !== '#') {
         window.open(app.url, '_blank');
-      } else if (app.download_url) {
-        window.open(app.download_url, '_blank');
-      } else if (app.github_url) {
-        window.open(app.github_url, '_blank');
+      } else if (downloadUrl) {
+        // Hidden download mechanism
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = downloadUrl;
+        document.body.appendChild(iframe);
+
+        // Optional: Clean up iframe after a delay
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+        }, 60000);
       }
     });
   };
