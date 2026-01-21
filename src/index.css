@@ -7,45 +7,45 @@
 @layer base {
   :root {
     --background: 220 20% 97%;
-    --foreground: 220 20% 10%;
+    --foreground: 220 25% 8%;
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 10%;
+    --card-foreground: 220 25% 8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 10%;
-    --primary: 185 100% 50%;
-    --primary-foreground: 220 25% 6%;
-    --secondary: 220 15% 92%;
-    --secondary-foreground: 220 20% 20%;
+    --popover-foreground: 220 25% 8%;
+    --primary: 185 100% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 90%;
+    --secondary-foreground: 220 25% 15%;
     --muted: 220 15% 92%;
-    --muted-foreground: 220 10% 45%;
-    --accent: 355 100% 55%;
+    --muted-foreground: 220 15% 35%;
+    --accent: 355 100% 45%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 85% 60%;
+    --destructive: 0 85% 50%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 88%;
-    --input: 220 15% 88%;
-    --ring: 185 100% 50%;
+    --border: 220 20% 82%;
+    --input: 220 20% 85%;
+    --ring: 185 100% 40%;
     --radius: 0.75rem;
 
-    /* Custom tokens - Neon Theme */
-    --neon-cyan: 185 100% 50%;
-    --neon-red: 355 100% 55%;
-    --neon-blue: 210 100% 55%;
-    --gradient-start: 185 100% 50%;
-    --gradient-end: 355 100% 55%;
-    --glass-bg: 0 0% 100% / 0.7;
-    --glass-border: 0 0% 100% / 0.3;
-    --glow-cyan: 185 100% 50%;
-    --glow-red: 355 100% 55%;
+    /* Custom tokens - Neon Theme Light - ENHANCED CONTRAST */
+    --neon-cyan: 185 100% 35%;
+    --neon-red: 355 100% 45%;
+    --neon-blue: 210 100% 45%;
+    --gradient-start: 185 100% 40%;
+    --gradient-end: 355 100% 50%;
+    --glass-bg: 0 0% 100% / 0.85;
+    --glass-border: 220 20% 70%;
+    --glow-cyan: 185 100% 40%;
+    --glow-red: 355 100% 50%;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-foreground: 220 25% 15%;
+    --sidebar-primary: 185 100% 35%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 92%;
+    --sidebar-accent-foreground: 220 25% 10%;
+    --sidebar-border: 220 20% 80%;
+    --sidebar-ring: 185 100% 40%;
   }
 
   .dark {
@@ -128,6 +128,27 @@
       0 0 30px hsl(var(--neon-cyan) / 0.15),
       0 0 60px hsl(var(--neon-red) / 0.1),
       inset 0 1px 0 hsl(var(--neon-cyan) / 0.1);
+  }
+
+  /* Light mode enhancements for better visibility */
+  :root .glass-card {
+    box-shadow:
+      0 4px 20px rgba(0, 0, 0, 0.08),
+      0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid hsl(220 20% 80%);
+  }
+
+  :root .glass-card:hover {
+    border-color: hsl(var(--neon-cyan));
+    box-shadow:
+      0 8px 30px rgba(0, 0, 0, 0.12),
+      0 0 20px hsl(var(--neon-cyan) / 0.25),
+      0 0 40px hsl(var(--neon-cyan) / 0.1);
+  }
+
+  .dark .glass-card {
+    box-shadow: none;
+    border: 1px solid hsl(var(--glass-border));
   }
 
   .gradient-text {
@@ -228,6 +249,51 @@
 
   .btn-neon:hover::before {
     left: 100%;
+  }
+
+  /* Light mode: stronger button contrast */
+  :root .btn-neon {
+    box-shadow:
+      0 4px 15px hsl(var(--neon-cyan) / 0.35),
+      0 2px 8px hsl(var(--neon-red) / 0.25);
+  }
+
+  :root .btn-neon:hover {
+    box-shadow:
+      0 6px 25px hsl(var(--neon-cyan) / 0.5),
+      0 4px 15px hsl(var(--neon-red) / 0.35);
+  }
+
+  /* Light mode: make outline buttons visible */
+  :root button[class*="outline"],
+  :root [data-variant="outline"] {
+    border-color: hsl(220 20% 75%) !important;
+  }
+
+  /* Light mode: stronger glow effects */
+  :root .glow {
+    box-shadow:
+      0 0 30px hsl(var(--neon-cyan) / 0.3),
+      0 0 60px hsl(var(--neon-red) / 0.15);
+  }
+
+  :root .glow-sm {
+    box-shadow:
+      0 0 15px hsl(var(--neon-cyan) / 0.25),
+      0 0 30px hsl(var(--neon-red) / 0.12);
+  }
+
+  :root .glow-cyan {
+    box-shadow: 0 0 25px hsl(var(--neon-cyan) / 0.4);
+  }
+
+  /* Light mode: visible neon border for page viewport */
+  :root .neon-border::before {
+    opacity: 0.6;
+  }
+
+  :root .neon-border:hover::before {
+    opacity: 1;
   }
 
   /* GPU acceleration hints for animations */
