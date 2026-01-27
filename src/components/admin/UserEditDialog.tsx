@@ -36,48 +36,48 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
         setLoading(true);
 
         try {
-            // 1. Update User Role (in user_roles table)
-            // Note: This requires admin privileges in database policies
+            // 1. Update User Role
             if (user.system_role !== role) {
-                // If switching to admin
-                if (role === 'admin') {
-                    const { error } = await supabase
-                        .from('user_roles')
-                        .upsert({ user_id: user.id, role: 'admin' }, { onConflict: 'user_id, role' });
-                    if (error) throw error;
-                } else {
-                    // If removing admin (switching to user) purely means removing the record from user_roles
-                    // Assuming 'user' is default and not stored explicitly if we rely on existence check, 
-                    // BUT our migration defines role TEXT NOT NULL.
-                    // Let's assume we update the record or delete it.
-                    // Based on initial logic, maybe we just update.
-                    const { error } = await supabase
-                        .from('user_roles')
-                        .upsert({ user_id: user.id, role: 'user' }, { onConflict: 'user_id, role' });
-                    if (error) throw error;
-                }
+                const { error } = await supabase
+                    .from('user_roles')
+                    .upsert({ user_id: user.id, role: role }, { onConflict: 'user_id, role' });
+                
+                if (error) throw error;
             }
 
-            // 2. Update Metadata (Account Type - Stored in auth.users raw_user_meta_data)
-            // Call Supabase Admin API or use a specific RPC function if RLS blocks direct update.
-            // Since we are client-side admin, we can't key `supabase.auth.admin.updateUserById` without service role key (dangerous in client).
-            // SOLUTION: We will assume we have an RPC or we use the fact that we can update public tables, 
-            // but metadata is tricky. For now, let's try to update via RLS on a 'profiles' table if it existed, 
-            // but we decided to use metadata.
-            // ACTUALLY: Best practice for Client-Side Admin is to call an Edge Function or RPC.
-            // Let's use an RPC if possible, OR just inform the user we need to run SQL.
-            // Wait, we don't have an RPC to update metadata in the previous step.
-            // LET'S ADD A SIMPLIFIED RPC OR just update role for now.
+            // 2. Update Metadata (Account Type - using RPC)
+            // Note: Requires admin_update_user_metadata RPC function in database
+            if (user.account_type !== accountType) {
+                const { error: rpcError } = await supabase.rpc('admin_update_user_metadata', {
+                    target_user_id: user.id,
+                    new_metadata: { account_type: accountType }
+                });
 
-            // For this implementation, let's focus on ROLE updating which uses `user_roles` table we control.
-            // For AccountType, we might need to add it to `user_roles` or a `profiles` table later.
-            // **Correction**: The list view reads from metadata. Updating metadata from client side for ANOTHER user is not possible with RLS on auth.users.
-            // We will skip AccountType update for now and focus on Role/Wallet which we can control via RPC/Table.
+                if (rpcError) throw new Error(`Metadata Update Failed: ${rpcError.message}`);
+            }
+
+            // 3. Sync to Google Sheets
+            // We sync if there are any changes to role or account type
+            if (user.system_role !== role || user.account_type !== accountType) {
+                // Import dynamically to avoid circular dependencies if any, 
+                // but standard import is fine. We will use the imported function.
+                const { updateUserInSheet } = await import('@/utils/googleSheets');
+                
+                // Preparing data for sync
+                // Note: user.subscription_level is not edited here yet, so we keep old value
+                await updateUserInSheet({
+                   email: user.email,
+                   account_type: accountType as any,
+                   // If we had subscription level editing, we would pass it too
+                   // ensuring accurate sync
+                });
+            }
 
             toast({ title: 'User updated successfully' });
             onSuccess();
             onClose();
         } catch (error: any) {
+            console.error('Update failed:', error);
             toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
         } finally {
             setLoading(false);
@@ -109,7 +109,7 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
                         </p>
                     </div>
 
-                    <div className="space-y-2 opacity-50 pointer-events-none" title="Metadata update not available yet">
+                    <div className="space-y-2">
                         <Label>Account Type (Plan)</Label>
                         <Select value={accountType} onValueChange={setAccountType}>
                             <SelectTrigger>
@@ -121,9 +121,8 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
                                 <SelectItem value="VIP2">VIP2</SelectItem>
                             </SelectContent>
                         </Select>
-                        <p className="text-xs text-yellow-500 flex items-center gap-1">
-                            <AlertTriangle className="w-3 h-3" />
-                            Metadata update requires Edge Function (Coming Soon)
+                        <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            Sets the user's plan level.
                         </p>
                     </div>
                 </div>
