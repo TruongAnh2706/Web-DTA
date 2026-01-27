@@ -51,6 +51,19 @@ export const translations = {
       web: 'Web',
       desktop: 'Windows',
     },
+    blog: {
+      title: 'Our Blog',
+      subtitle: 'Insights, updates, and stories from the DTA Studio team.',
+      readMore: 'Read Article',
+      featured: 'Featured',
+      back: 'Back to Blog',
+      minRead: 'min read',
+      thanks: 'Thanks for reading!',
+      share: 'Share this post',
+      noPosts: 'No posts found yet. Check back later!',
+      latest: 'Latest Posts',
+      dateFormat: 'MMM d, yyyy',
+    },
   },
   vi: {
     nav: {
@@ -100,6 +113,19 @@ export const translations = {
     badges: {
       web: 'Web',
       desktop: 'Windows',
+    },
+    blog: {
+      title: 'Blog Của Chúng Tôi',
+      subtitle: 'Tin tức, cập nhật và câu chuyện từ đội ngũ DTA Studio.',
+      readMore: 'Xem Bài Viết',
+      featured: 'Nổi Bật',
+      back: 'Quay Lại',
+      minRead: 'phút đọc',
+      thanks: 'Cảm ơn bạn đã đọc!',
+      share: 'Chia sẻ bài viết',
+      noPosts: 'Chưa có bài viết nào. Hãy quay lại sau!',
+      latest: 'Bài Viết Mới Nhất',
+      dateFormat: 'd MMM, yyyy', // date-fns format
     },
   },
 };

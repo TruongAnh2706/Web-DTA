@@ -33,6 +33,7 @@ const Header = () => {
     { label: t.nav.home, href: '/' },
     { label: t.nav.apps, href: '/#apps' }, // We'll handle this click to ensure scrolling
     { label: 'Web Tools', href: '/tools' },
+    { label: 'Blog', href: '/blog' },
     { label: language === 'vi' ? 'Bảng Giá' : 'Pricing', href: '/pricing' },
     { label: t.nav.about, href: '/#about' },
     { label: t.nav.contact, href: '/#contact' },

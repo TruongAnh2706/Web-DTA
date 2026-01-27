@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Github, Facebook, Mail, Heart } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Link } from 'react-router-dom';
 
 const socialLinks = [
   { icon: Github, href: 'https://github.com/TruongAnh2706', label: 'GitHub' },
@@ -31,6 +32,9 @@ const Footer = () => {
               <span className="font-bold text-lg">
                 DTA <span className="gradient-text">Studio</span>
               </span>
+            </div>
+            <div className="flex gap-4 text-sm mt-4 md:mt-0">
+              <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link>
             </div>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               {t.footer.copyright}

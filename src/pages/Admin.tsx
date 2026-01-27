@@ -25,6 +25,8 @@ import UserEditDialog, { WalletUpdateDialog } from '@/components/admin/UserEditD
 import { supabase } from '@/integrations/supabase/client';
 import FileUpload from '@/components/admin/FileUpload';
 import AppFormFullscreen from '@/components/admin/AppFormFullscreen';
+import BlogManager from '@/pages/admin/BlogManager';
+import { FileText } from 'lucide-react';
 
 const iconOptions = [
   'Monitor', 'Globe', 'Zap', 'MousePointer2', 'Eye', 'Video', 'FileCode', 'Sparkles'
@@ -159,6 +161,7 @@ const AdminPage = () => {
       totalRevenue: 'Total Revenue',
       users: 'Users Management',
       apps: 'Apps Management',
+      blog: 'Blog Management',
     },
     vi: {
       title: 'Trang Quản Trị',
@@ -196,6 +199,7 @@ const AdminPage = () => {
       totalRevenue: 'Tổng Doanh thu',
       users: 'Quản lý Người dùng',
       apps: 'Quản lý Ứng dụng',
+      blog: 'Quản lý Bài viết',
     },
   };
 
@@ -426,7 +430,7 @@ const AdminPage = () => {
             </div>
 
             <Tabs defaultValue="apps" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 glass-card p-1 rounded-xl mb-8 h-auto">
+              <TabsList className="grid w-full grid-cols-3 glass-card p-1 rounded-xl mb-8 h-auto">
                 <TabsTrigger value="apps" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                   <Monitor className="w-4 h-4 mr-2" />
                   {texts.apps}
@@ -434,6 +438,10 @@ const AdminPage = () => {
                 <TabsTrigger value="users" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                   <Users className="w-4 h-4 mr-2" />
                   {texts.users}
+                </TabsTrigger>
+                <TabsTrigger value="blog" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                  <FileText className="w-4 h-4 mr-2" />
+                  {texts.blog}
                 </TabsTrigger>
               </TabsList>
 
@@ -591,61 +599,66 @@ const AdminPage = () => {
                   onSuccess={fetchUsers}
                 />
               </TabsContent>
+
+              <TabsContent value="blog">
+                <BlogManager />
+              </TabsContent>
             </Tabs>
           </div>
         </div>
-      </div>
 
-      {/* Fullscreen App Form */}
-      <AppFormFullscreen
-        isOpen={editingApp !== null || isCreating}
-        isCreating={isCreating}
-        initialData={formData}
-        onSave={async (data) => {
-          try {
-            if (isCreating) {
-              // Remove 'id' so Supabase generates a new UUID
-              const { id, ...createData } = data;
-              await createApp.mutateAsync(createData as unknown as Omit<AppData, 'created_at' | 'updated_at' | 'is_active'>);
-              toast({ title: texts.success, description: texts.appCreated });
-            } else if (editingApp) {
-              await updateApp.mutateAsync({ ...data, id: editingApp.id } as unknown as Partial<AppData> & { id: string });
-              toast({ title: texts.success, description: texts.appUpdated });
+
+        {/* Fullscreen App Form */}
+        <AppFormFullscreen
+          isOpen={editingApp !== null || isCreating}
+          isCreating={isCreating}
+          initialData={formData}
+          onSave={async (data) => {
+            try {
+              if (isCreating) {
+                // Remove 'id' so Supabase generates a new UUID
+                const { id, ...createData } = data;
+                await createApp.mutateAsync(createData as unknown as Omit<AppData, 'created_at' | 'updated_at' | 'is_active'>);
+                toast({ title: texts.success, description: texts.appCreated });
+              } else if (editingApp) {
+                await updateApp.mutateAsync({ ...data, id: editingApp.id } as unknown as Partial<AppData> & { id: string });
+                toast({ title: texts.success, description: texts.appUpdated });
+              }
+              setEditingApp(null);
+              setIsCreating(false);
+              setFormData({});
+            } catch (error) {
+              let errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+              // Localize common errors
+              if (errorMessage.includes('invalid input syntax for type uuid')) {
+                errorMessage = language === 'vi'
+                  ? 'Lỗi: ID phải là dạng UUID chuẩn (không được tự đặt tên như "auto-down"). Hệ thống sẽ tự tạo ID.'
+                  : 'Error: ID must be a valid UUID. The system will auto-generate it.';
+              } else if (errorMessage.includes('duplicate key')) {
+                errorMessage = language === 'vi'
+                  ? 'Lỗi: Dữ liệu bị trùng lặp (có thể do ID hoặc tên).'
+                  : 'Error: Duplicate data entry (ID or title).';
+              } else if (errorMessage.includes('violates row-level security policy')) {
+                errorMessage = language === 'vi'
+                  ? 'Lỗi Quyền: Bạn cần chạy lệnh SQL cấp quyền Admin trong Supabase.'
+                  : 'Permission Error: You need to run the SQL grant command in Supabase.';
+              }
+
+              toast({
+                title: texts.error,
+                description: errorMessage,
+                variant: 'destructive'
+              });
             }
+          }}
+          onClose={() => {
             setEditingApp(null);
             setIsCreating(false);
-            setFormData({});
-          } catch (error) {
-            let errorMessage = error instanceof Error ? error.message : 'Unknown error';
-
-            // Localize common errors
-            if (errorMessage.includes('invalid input syntax for type uuid')) {
-              errorMessage = language === 'vi'
-                ? 'Lỗi: ID phải là dạng UUID chuẩn (không được tự đặt tên như "auto-down"). Hệ thống sẽ tự tạo ID.'
-                : 'Error: ID must be a valid UUID. The system will auto-generate it.';
-            } else if (errorMessage.includes('duplicate key')) {
-              errorMessage = language === 'vi'
-                ? 'Lỗi: Dữ liệu bị trùng lặp (có thể do ID hoặc tên).'
-                : 'Error: Duplicate data entry (ID or title).';
-            } else if (errorMessage.includes('violates row-level security policy')) {
-              errorMessage = language === 'vi'
-                ? 'Lỗi Quyền: Bạn cần chạy lệnh SQL cấp quyền Admin trong Supabase.'
-                : 'Permission Error: You need to run the SQL grant command in Supabase.';
-            }
-
-            toast({
-              title: texts.error,
-              description: errorMessage,
-              variant: 'destructive'
-            });
-          }
-        }}
-        onClose={() => {
-          setEditingApp(null);
-          setIsCreating(false);
-        }}
-        saving={updateApp.isPending || createApp.isPending}
-      />
+          }}
+          saving={updateApp.isPending || createApp.isPending}
+        />
+      </div>
     </div>
   );
 };
