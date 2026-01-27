@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
     ArrowLeft, Save, X, Loader2,
     Globe, Monitor, ExternalLink, Github, Download, Sparkles,
-    Youtube, BookOpen, Crown
+    Youtube, BookOpen, Crown, Settings, Image, HardDrive, Play, Shield, CloudDownload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,10 +23,30 @@ import FileUpload from '@/components/admin/FileUpload';
 import MultiFileUpload from '@/components/admin/MultiFileUpload';
 import type { AppData } from '@/hooks/useApps';
 import type { AccountType } from '@/contexts/AuthContext';
+import { getIconComponent } from '@/hooks/useApps';
 
 const iconOptions = [
-    'Monitor', 'Globe', 'Zap', 'MousePointer2', 'Eye', 'Video', 'FileCode', 'Sparkles'
+    'Monitor', 'Globe', 'Zap', 'MousePointer2', 'Eye', 'Video', 'FileCode', 'Sparkles',
+    'Download', 'Settings', 'Image', 'HardDrive', 'Play', 'Shield', 'CloudDownload'
 ];
+
+const iconLabels: Record<string, string> = {
+    Monitor: 'Màn hình',
+    Globe: 'Website',
+    Zap: 'Năng lượng',
+    MousePointer2: 'Con trỏ',
+    Eye: 'Con mắt',
+    Video: 'Camera/Video',
+    FileCode: 'Mã nguồn',
+    Sparkles: 'Lấp lánh',
+    Download: 'Tải về',
+    Settings: 'Cài đặt',
+    Image: 'Hình ảnh',
+    HardDrive: 'Ổ cứng/Disk',
+    Play: 'Phát/Play',
+    Shield: 'Bảo mật',
+    CloudDownload: 'Tải đám mây'
+};
 
 interface AppFormFullscreenProps {
     isOpen: boolean;
@@ -283,9 +303,19 @@ const AppFormFullscreen = ({
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent className="z-[200]">
-                                            {iconOptions.map((icon) => (
-                                                <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                                            ))}
+                                            {iconOptions.map((iconName) => {
+                                                const Icon = getIconComponent(iconName);
+                                                return (
+                                                    <SelectItem key={iconName} value={iconName}>
+                                                        <div className="flex items-center gap-2">
+                                                            <Icon className="w-4 h-4" />
+                                                            <span>
+                                                                {language === 'vi' ? (iconLabels[iconName] || iconName) : iconName}
+                                                            </span>
+                                                        </div>
+                                                    </SelectItem>
+                                                );
+                                            })}
                                         </SelectContent>
                                     </Select>
                                 </div>

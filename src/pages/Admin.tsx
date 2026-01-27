@@ -438,79 +438,120 @@ const AdminPage = () => {
               </TabsList>
 
               <TabsContent value="apps">
-                <div className="grid lg:grid-cols-2 gap-8">
-                  {/* App List */}
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="space-y-4"
-                  >
-                    <h2 className="text-xl font-bold mb-4">
-                      {language === 'vi' ? 'Danh sách ứng dụng' : 'App List'}
-                    </h2>
+                {/* App List */}
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="space-y-4"
+                >
+                  <h2 className="text-xl font-bold mb-4">
+                    {language === 'vi' ? 'Danh sách ứng dụng' : 'App List'}
+                  </h2>
 
-                    {appsLoading ? (
-                      <div className="flex justify-center py-8">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        {apps?.map((app) => {
-                          const Icon = getIconComponent(app.icon_name);
-                          return (
-                            <motion.div
-                              key={app.id}
-                              layout
-                              className={`glass-card p-4 rounded-xl flex items-center justify-between ${editingApp?.id === app.id ? 'neon-border' : ''
-                                }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg gradient-neon flex items-center justify-center">
-                                  <Icon className="w-5 h-5 text-background" />
-                                </div>
-                                <div>
-                                  <h3 className="font-semibold">{language === 'vi' ? app.title_vi : app.title}</h3>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="secondary" className="text-xs">
-                                      {app.platform === 'web' ? <Globe className="w-3 h-3 mr-1" /> : <Monitor className="w-3 h-3 mr-1" />}
-                                      {app.platform}
-                                    </Badge>
-                                    {app.featured && (
-                                      <Badge className="gradient-neon text-background text-xs">Featured</Badge>
-                                    )}
-                                    {!app.is_active && (
-                                      <Badge variant="destructive" className="text-xs">Inactive</Badge>
-                                    )}
-                                  </div>
+                  {appsLoading ? (
+                    <div className="flex justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {apps?.map((app) => {
+                        const Icon = getIconComponent(app.icon_name);
+                        return (
+                          <motion.div
+                            key={app.id}
+                            layout
+                            className={`glass-card rounded-xl overflow-hidden flex flex-col h-full group transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 ${editingApp?.id === app.id ? 'neon-border' : ''
+                              }`}
+                          >
+                            {/* Thumbnail / Header Area */}
+                            <div className="aspect-video relative bg-secondary/30 flex items-center justify-center overflow-hidden">
+                              {app.image_url ? (
+                                <img
+                                  src={app.image_url}
+                                  alt={app.title}
+                                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                  onError={(e) => {
+                                    // Fallback if image fails
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.parentElement?.classList.add('fallback-icon');
+                                  }}
+                                />
+                              ) : null}
+
+                              {/* Icon Overlay (Visible if no image or strictly as overlay) */}
+                              <div className={`absolute inset-0 flex items-center justify-center ${app.image_url ? 'bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300' : ''}`}>
+                                <div className="w-16 h-16 rounded-2xl gradient-neon flex items-center justify-center shadow-2xl transform group-hover:scale-110 transition-transform duration-300">
+                                  <Icon className="w-8 h-8 text-background" />
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => handleEdit(app)}
-                                  className="rounded-lg hover:bg-primary/10"
-                                >
-                                  <Pencil className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => handleDelete(app.id)}
-                                  className="rounded-lg hover:bg-destructive/10 text-destructive"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            </motion.div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </motion.div>
 
-                  {/* Old Edit Form removed - using AppFormFullscreen instead */}
-                </div>
+                              {/* Status Badges */}
+                              <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+                                {app.featured && (
+                                  <Badge className="gradient-neon text-background text-xs shadow-lg">
+                                    {language === 'vi' ? 'Nổi bật' : 'Featured'}
+                                  </Badge>
+                                )}
+                                {!app.is_active && (
+                                  <Badge variant="destructive" className="text-xs shadow-lg">Inactive</Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Content Body */}
+                            <div className="p-4 flex-1 flex flex-col gap-2">
+                              <div className="flex justify-between items-start gap-2">
+                                <h3 className="font-bold text-lg leading-tight line-clamp-1" title={language === 'vi' ? app.title_vi : app.title}>
+                                  {language === 'vi' ? app.title_vi : app.title}
+                                </h3>
+                              </div>
+
+                              <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2.5em]">
+                                {language === 'vi' ? app.description_vi : app.description}
+                              </p>
+
+                              <div className="mt-auto pt-2 flex flex-wrap gap-1">
+                                <Badge variant="secondary" className="text-[10px] h-5">
+                                  {app.platform === 'web' ? <Globe className="w-3 h-3 mr-1" /> : <Monitor className="w-3 h-3 mr-1" />}
+                                  {app.platform}
+                                </Badge>
+                                {app.categories?.slice(0, 2).map((cat: string) => (
+                                  <Badge key={cat} variant="outline" className="text-[10px] h-5 border-primary/20">
+                                    {cat}
+                                  </Badge>
+                                ))}
+                                {(app.categories?.length || 0) > 2 && (
+                                  <Badge variant="outline" className="text-[10px] h-5 border-primary/20">+{((app.categories?.length || 0) - 2)}</Badge>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="p-4 pt-0 mt-2 flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEdit(app)}
+                                className="flex-1 bg-primary/5 hover:bg-primary/20 border-primary/20 hover:border-primary/50 text-xs font-medium h-9"
+                              >
+                                <Pencil className="w-3.5 h-3.5 mr-1.5" />
+                                {texts.edit}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(app.id)}
+                                className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
               </TabsContent>
 
               <TabsContent value="users">

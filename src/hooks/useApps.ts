@@ -1,6 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Monitor, Globe, Zap, MousePointer2, Eye, Video, FileCode, Sparkles, type LucideIcon } from 'lucide-react';
+import {
+  Monitor, Globe, Zap, MousePointer2, Eye, Video, FileCode, Sparkles,
+  Download, Settings, Image, HardDrive, Play, Shield, CloudDownload,
+  type LucideIcon
+} from 'lucide-react';
 import type { AccountType } from '@/contexts/AuthContext';
 
 export type Platform = 'web' | 'desktop';
@@ -37,6 +41,13 @@ const iconMap: Record<string, LucideIcon> = {
   Video,
   FileCode,
   Sparkles,
+  Download,
+  Settings,
+  Image,
+  HardDrive,
+  Play,
+  Shield,
+  CloudDownload,
 };
 
 export const getIconComponent = (iconName: string): LucideIcon => {
