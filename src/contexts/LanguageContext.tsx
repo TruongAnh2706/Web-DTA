@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
 import { translations, Language } from '@/lib/data';
 
 interface LanguageContextType {
@@ -9,8 +9,22 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Đọc ngôn ngữ đã lưu từ localStorage, mặc định là 'vi' (Tiếng Việt)
+const getInitialLanguage = (): Language => {
+  try {
+    const saved = localStorage.getItem('dta_language');
+    if (saved === 'en' || saved === 'vi') return saved;
+  } catch { /* ignore */ }
+  return 'vi';
+};
+
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    try { localStorage.setItem('dta_language', lang); } catch { /* ignore */ }
+  }, []);
 
   const t = translations[language];
 

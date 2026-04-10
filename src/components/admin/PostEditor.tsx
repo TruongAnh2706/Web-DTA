@@ -13,7 +13,7 @@ import {
     Link as LinkIcon, Image as ImageIcon, Youtube as YoutubeIcon,
     Heading1, Heading2, Heading3, Undo, Redo
 } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
 interface PostEditorProps {
     content: string;
@@ -45,6 +45,12 @@ const PostEditor = ({ content, onChange }: PostEditorProps) => {
             },
         },
     });
+
+    useEffect(() => {
+        if (editor && content !== editor.getHTML()) {
+            editor.commands.setContent(content);
+        }
+    }, [content, editor]);
 
     const addImage = useCallback(() => {
         const url = window.prompt('Enter image URL');

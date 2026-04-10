@@ -16,6 +16,7 @@ export interface AuthState {
     signUp: (email: string, password: string) => Promise<{ data: any; error: any }>;
     signOut: () => Promise<{ error: any }>;
     signInWithGoogle: () => Promise<{ data: any; error: any }>;
+    resetPassword: (email: string) => Promise<{ data: any; error: any }>;
 }
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
@@ -47,8 +48,15 @@ const checkUserRole = async (userId: string): Promise<boolean> => {
 // Helper to process user authentication state
 const processUserAuth = async (user: User | null) => {
     let isAdmin = false;
+    let isBlocked = false;
 
     if (user) {
+        if (user.user_metadata?.is_blocked) {
+            isBlocked = true;
+            await supabase.auth.signOut();
+            return { isAdmin: false, accountType: 'Free' as AccountType, subscriptionLevel: 'None' as SubscriptionLevel, isBlocked };
+        }
+
         // Check whitelist first (fast path)
         if (ADMIN_EMAILS.includes(user.email || '')) {
             isAdmin = true;
@@ -61,7 +69,7 @@ const processUserAuth = async (user: User | null) => {
     const accountType = (user?.user_metadata?.account_type as AccountType) || 'Free';
     const subscriptionLevel = (user?.user_metadata?.subscription_level as SubscriptionLevel) || 'None';
 
-    return { isAdmin, accountType, subscriptionLevel };
+    return { isAdmin, accountType, subscriptionLevel, isBlocked };
 };
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -98,7 +106,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 if (!mounted) return;
 
                 const user = session?.user ?? null;
-                const { isAdmin, accountType, subscriptionLevel } = await processUserAuth(user);
+                const { isAdmin, accountType, subscriptionLevel, isBlocked } = await processUserAuth(user);
+
+                if (isBlocked) {
+                    setAuthState({
+                        user: null,
+                        session: null,
+                        loading: false,
+                        isAdmin: false,
+                        accountType: 'Free',
+                        subscriptionLevel: 'None',
+                    });
+                    return;
+                }
 
                 setAuthState({
                     user,
@@ -117,7 +137,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             clearTimeout(safetyTimeout);
 
             const user = session?.user ?? null;
-            const { isAdmin, accountType, subscriptionLevel } = await processUserAuth(user);
+            const { isAdmin, accountType, subscriptionLevel, isBlocked } = await processUserAuth(user);
+
+            if (isBlocked) {
+                setAuthState({
+                    user: null,
+                    session: null,
+                    loading: false,
+                    isAdmin: false,
+                    accountType: 'Free',
+                    subscriptionLevel: 'None',
+                });
+                return;
+            }
 
             setAuthState({
                 user,
@@ -143,12 +175,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     const signIn = async (email: string, password: string) => {
-        const signInPromise = supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
         });
 
-        const { data, error } = await signInPromise;
+        if (data?.user?.user_metadata?.is_blocked) {
+            await supabase.auth.signOut();
+            return { data: null, error: new Error('Tài khoản của bạn đã bị khóa bởi Quản trị viên.') };
+        }
 
         return { data, error };
     };
@@ -180,12 +215,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
             }
         });
+        
         console.log('[Auth] Redirecting to:', `${window.location.origin}/`);
         return { data, error };
     };
 
+    const resetPassword = async (email: string) => {
+        const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/reset-password`,
+        });
+        return { data, error };
+    };
+
     return (
-        <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, signInWithGoogle }}>
+        <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, signInWithGoogle, resetPassword }}>
             {children}
         </AuthContext.Provider>
     );

@@ -10,6 +10,24 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { getIconComponent } from '@/hooks/useApps';
 
+// Helper: Strip markdown characters cho mô tả sạch
+const stripMarkdown = (text: string): string => {
+    if (!text) return '';
+    return text
+        .replace(/#{1,6}\s?/g, '')        // Remove headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
+        .replace(/\*(.*?)\*/g, '$1')     // Remove italic
+        .replace(/`(.*?)`/g, '$1')       // Remove inline code
+        .replace(/!\[.*?\]\(.*?\)/g, '') // Remove images
+        .replace(/\[([^\]]+)\]\(.*?\)/g, '$1') // Remove links, keep text
+        .replace(/^[-*+]\s/gm, '')        // Remove list markers
+        .replace(/^\d+\.\s/gm, '')        // Remove numbered lists
+        .replace(/[✨🎯💡🚀⚡🔥]/g, '') // Remove emojis
+        .replace(/\n{2,}/g, ' ')         // Multiple newlines to space
+        .replace(/\n/g, ' ')             // Newlines to space
+        .trim();
+};
+
 const WebTools = () => {
     const { data: apps, isLoading } = useApps();
     const { language } = useLanguage();
@@ -67,7 +85,7 @@ const WebTools = () => {
                                     {language === 'vi' ? app.title_vi : app.title}
                                 </h3>
                                 <p className="text-muted-foreground mb-6 flex-1 line-clamp-3">
-                                    {language === 'vi' ? app.description_vi : app.description}
+                                    {stripMarkdown(language === 'vi' ? app.description_vi : app.description)}
                                 </p>
 
                                 <Link to={`/app/${app.id}`}>

@@ -27,6 +27,7 @@ import FileUpload from '@/components/admin/FileUpload';
 import AppFormFullscreen from '@/components/admin/AppFormFullscreen';
 import BlogManager from '@/pages/admin/BlogManager';
 import { FileText } from 'lucide-react';
+import { AISettingsModal } from '@/components/admin/AISettingsModal';
 
 const iconOptions = [
   'Monitor', 'Globe', 'Zap', 'MousePointer2', 'Eye', 'Video', 'FileCode', 'Sparkles'
@@ -45,10 +46,8 @@ const AdminPage = () => {
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Partial<AppData>>({});
 
-  // AI State
   const [generating, setGenerating] = useState(false);
-  const [apiKey, setApiKey] = useState('');
-  const [showApiKeyInput, setShowApiKeyInput] = useState(false);
+  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
 
   // User Management State
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -78,23 +77,9 @@ const AdminPage = () => {
     }
   }, [isAdmin, fetchUsers]);
 
-  useEffect(() => {
-    const storedKey = localStorage.getItem('deepseek_api_key');
-    if (storedKey) setApiKey(storedKey);
-  }, []);
 
-  const saveApiKey = () => {
-    localStorage.setItem('deepseek_api_key', apiKey);
-    setShowApiKeyInput(false);
-    toast({ title: 'API Key Saved' });
-  };
 
   const handleGenerateAI = async (lang: 'vi' | 'en') => {
-    if (!apiKey) {
-      setShowApiKeyInput(true);
-      toast({ title: 'Please enter DeepSeek API Key first', variant: 'destructive' });
-      return;
-    }
     if (!formData.title) {
       toast({ title: 'Please enter a title first', variant: 'destructive' });
       return;
@@ -106,8 +91,7 @@ const AdminPage = () => {
         formData.title || '',
         lang === 'vi' ? formData.description_vi || '' : formData.description || '',
         'apple',
-        lang,
-        apiKey
+        lang
       );
 
       if (lang === 'vi') {
@@ -350,13 +334,13 @@ const AdminPage = () => {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button
+             <Button
                 variant="outline"
-                onClick={() => setShowApiKeyInput(!showApiKeyInput)}
+                onClick={() => setShowApiKeyModal(true)}
                 className="rounded-full border-primary/20"
               >
                 <Key className="w-4 h-4 mr-2" />
-                API Key
+                API Keys
               </Button>
               <Button onClick={handleCreate} className="btn-neon rounded-full text-background">
                 <Plus className="w-4 h-4 mr-2" />
@@ -369,31 +353,7 @@ const AdminPage = () => {
             </div>
           </motion.div>
 
-          {/* API Key Input */}
-          <AnimatePresence>
-            {showApiKeyInput && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-8 overflow-hidden"
-              >
-                <div className="glass-card p-4 rounded-xl flex items-end gap-4 max-w-md ml-auto">
-                  <div className="flex-1 space-y-2">
-                    <Label>DeepSeek API Key</Label>
-                    <Input
-                      type="password"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="sk-..."
-                      className="rounded-xl"
-                    />
-                  </div>
-                  <Button onClick={saveApiKey}>Save</Button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <AISettingsModal isOpen={showApiKeyModal} onClose={() => setShowApiKeyModal(false)} />
 
           <div className="space-y-8">
             {/* Stats Cards */}
@@ -413,8 +373,8 @@ const AdminPage = () => {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{texts.totalUsers}</div>
-                  <div className="text-3xl font-bold">1,234</div>
-                  <div className="text-xs text-green-500">+12% this month</div>
+                  <div className="text-3xl font-bold">{users.length}</div>
+                  <div className="text-xs text-muted-foreground">Đã đăng ký</div>
                 </div>
               </div>
               <div className="glass-card p-6 rounded-xl flex items-center gap-4">
@@ -423,8 +383,8 @@ const AdminPage = () => {
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{texts.totalRevenue}</div>
-                  <div className="text-3xl font-bold">$12,450</div>
-                  <div className="text-xs text-green-500">+8% this month</div>
+                  <div className="text-3xl font-bold">0 VNĐ</div>
+                  <div className="text-xs text-muted-foreground">Chưa có dữ liệu giao dịch</div>
                 </div>
               </div>
             </div>

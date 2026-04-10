@@ -23,6 +23,7 @@ export interface AdminUser {
     last_sign_in_at: string | null;
     account_type: string;
     subscription_level: string;
+    is_blocked: boolean;
 }
 
 interface UserTableProps {
@@ -99,6 +100,9 @@ const UserTable = ({ users, onEdit, onUpdateWallet, loading }: UserTableProps) =
                                                 <Badge variant="outline" className="border-primary/20 text-xs">
                                                     {user.account_type || 'Free'}
                                                 </Badge>
+                                                {user.is_blocked && (
+                                                    <Badge variant="destructive" className="text-xs">Bị Khóa</Badge>
+                                                )}
                                             </div>
                                             {user.subscription_level !== 'None' && (
                                                 <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-500">

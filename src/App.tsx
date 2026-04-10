@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import { AIChatWidget } from "@/components/AIChatWidget";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -20,6 +21,9 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const WebTools = lazy(() => import("./pages/WebTools"));
 const Blog = lazy(() => import("./pages/Blog"));
 const BlogPost = lazy(() => import("./pages/BlogPost"));
+const Profile = lazy(() => import("./pages/Profile"));
+const Changelog = lazy(() => import("./pages/Changelog"));
+const FAQ = lazy(() => import("./pages/FAQ"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -60,10 +64,14 @@ const App = () => (
                   <Route path="/tools" element={<WebTools />} />
                   <Route path="/blog" element={<Blog />} />
                   <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/changelog" element={<Changelog />} />
+                  <Route path="/faq" element={<FAQ />} />
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                <AIChatWidget />
               </Suspense>
             </BrowserRouter>
           </TooltipProvider>

@@ -14,7 +14,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/hooks/useAuth';
+import { useDashboard } from '@/hooks/useDashboard';
 import WalletModal from './WalletModal';
+import { SearchCommand } from './SearchCommand';
+import { NotificationDropdown } from './NotificationDropdown';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -22,6 +25,7 @@ const Header = () => {
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
   const { user, isAdmin, signOut } = useAuth();
+  const { data: dashboardData } = useDashboard();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -116,6 +120,8 @@ const Header = () => {
 
               {/* Controls */}
               <div className="flex items-center gap-2">
+                <SearchCommand />
+                
                 {!user ? (
                   <Link to="/auth">
                     <Button className="btn-neon rounded-xl text-background font-bold tracking-wider">
@@ -146,8 +152,14 @@ const Header = () => {
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                        <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                           <User className="w-4 h-4" />
+                          <span>{language === 'vi' ? 'Hồ sơ cá nhân' : 'My Profile'}</span>
+                        </Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <Settings className="w-4 h-4" />
                           <span>{language === 'vi' ? 'Dashboard' : 'Dashboard'}</span>
                         </Link>
                       </DropdownMenuItem>
@@ -162,6 +174,9 @@ const Header = () => {
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
+
+                {/* Notification Dropdown */}
+                {user && <NotificationDropdown />}
 
                 {/* Wallet Button */}
                 {user && (
@@ -267,7 +282,7 @@ const Header = () => {
       <WalletModal
         isOpen={isWalletOpen}
         onClose={() => setIsWalletOpen(false)}
-        balance={0} // Mock balance for now, can be connected to Supabase later
+        balance={dashboardData?.wallet?.balance || 0}
       />
     </>
   );

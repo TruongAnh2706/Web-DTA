@@ -35,6 +35,8 @@ const Footer = () => {
             </div>
             <div className="flex gap-4 text-sm mt-4 md:mt-0">
               <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link>
+              <Link to="/changelog" className="text-muted-foreground hover:text-primary transition-colors">Changelog</Link>
+              <Link to="/faq" className="text-muted-foreground hover:text-primary transition-colors">FAQ</Link>
             </div>
             <p className="text-sm text-muted-foreground flex items-center gap-1">
               {t.footer.copyright}

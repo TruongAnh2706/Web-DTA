@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Loader2, DollarSign, Shield, AlertTriangle } from 'lucide-react';
 import { AdminUser } from './UserTable';
 import { useToast } from '@/hooks/use-toast';
@@ -23,11 +24,13 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
     // Form states
     const [role, setRole] = useState<'admin' | 'user'>('user');
     const [accountType, setAccountType] = useState('Free');
+    const [isBlocked, setIsBlocked] = useState(false);
 
     useEffect(() => {
         if (user) {
             setRole((user.system_role as 'admin' | 'user') || 'user');
             setAccountType(user.account_type || 'Free');
+            setIsBlocked(user.is_blocked || false);
         }
     }, [user]);
 
@@ -47,10 +50,13 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
 
             // 2. Update Metadata (Account Type - using RPC)
             // Note: Requires admin_update_user_metadata RPC function in database
-            if (user.account_type !== accountType) {
+            if (user.account_type !== accountType || user.is_blocked !== isBlocked) {
                 const { error: rpcError } = await supabase.rpc('admin_update_user_metadata', {
                     target_user_id: user.id,
-                    new_metadata: { account_type: accountType }
+                    new_metadata: { 
+                        account_type: accountType,
+                        is_blocked: isBlocked 
+                    }
                 });
 
                 if (rpcError) throw new Error(`Metadata Update Failed: ${rpcError.message}`);
@@ -124,6 +130,22 @@ const UserEditDialog = ({ user, isOpen, onClose, onSuccess }: UserEditDialogProp
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
                             Sets the user's plan level.
                         </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Bảo mật / Trạng thái</Label>
+                        <div className="flex items-center gap-4 p-3 border border-destructive/20 bg-destructive/5 rounded-xl">
+                            <AlertTriangle className="w-5 h-5 text-destructive" />
+                            <div className="flex-1">
+                                <h4 className="text-sm font-bold text-destructive">Khóa tài khoản</h4>
+                                <p className="text-xs text-muted-foreground">Người dùng sẽ không thể đăng nhập vào hệ thống.</p>
+                            </div>
+                            <Switch 
+                                checked={isBlocked}
+                                onCheckedChange={setIsBlocked}
+                                className="data-[state=checked]:bg-destructive"
+                            />
+                        </div>
                     </div>
                 </div>
 

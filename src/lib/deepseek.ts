@@ -1,6 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
-
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/chat/completions';
+import { fetchWithAIRetry } from "@/lib/aiUtils";
 
 const cleanMarkdownSymbols = (text: string): string => {
     return text
@@ -16,17 +14,8 @@ export const generateAppContent = async (
     name: string,
     context: string = '',
     style: string = 'apple', // 'apple', 'notion', 'fun', 'professional'
-    language: 'vi' | 'en' = 'vi',
-    apiKey?: string
+    language: 'vi' | 'en' = 'vi'
 ): Promise<string> => {
-
-    if (!apiKey) {
-        // Try getting from local storage if not passed specifically
-        apiKey = localStorage.getItem('deepseek_api_key') || '';
-        if (!apiKey) {
-            throw new Error('Missing DeepSeek API Key');
-        }
-    }
 
     let styleInstruction = '';
     switch (style) {
@@ -93,34 +82,34 @@ CRITICAL REQUIREMENTS:
 Return ONLY the description text content.`;
 
     try {
-        const response = await fetch(DEEPSEEK_API_URL, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apiKey}`,
-            },
-            body: JSON.stringify({
-                model: "deepseek-chat",
-                messages: [
-                    { role: "system", content: "You are a professional Tech Copywriter." },
-                    { role: "user", content: prompt }
-                ],
-                temperature: 0.7,
-                max_tokens: 2000
-            })
+        const response = await fetchWithAIRetry('deepseek', async (apiKey: string, fallbackModel?: string) => {
+            return await fetch('https://api.deepseek.com/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [
+                        { role: "system", content: "You are a professional Tech Copywriter." },
+                        { role: "user", content: prompt }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
         });
-
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || 'Failed to generate content');
-        }
 
         const data = await response.json();
         const content = data.choices[0]?.message?.content || '';
 
         return cleanMarkdownSymbols(content);
-    } catch (error) {
+    } catch (error: any) {
+        if (error.message?.includes('NO_API_KEY')) {
+            throw new Error('Vui lòng thêm DeepSeek API Key vào cấu hình.');
+        }
         console.error('DeepSeek API Error:', error);
-        throw error;
+        throw new Error('Lỗi máy chủ AI hoặc hết hạn ngạch.');
     }
 };

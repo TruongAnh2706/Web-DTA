@@ -1,9 +1,31 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Code, Heart, Zap, Shield, Globe, Users } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const About = () => {
   const { language } = useLanguage();
+  const [stats, setStats] = useState({ users: '10k+', apps: '50+' });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        // @ts-expect-error missing type in generated schema
+        const { data, error } = await supabase.rpc('get_public_stats');
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setStats({
+            users: data[0].total_users.toString(),
+            apps: data[0].total_apps.toString()
+          });
+        }
+      } catch (err) {
+        console.error('Failed to fetch public stats:', err);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const t = {
     vi: {
@@ -14,7 +36,7 @@ const About = () => {
       vision: 'Tầm Nhìn',
       visionDesc: 'Trở thành "Vũ khí bí mật" không thể thiếu của mọi MMO-er và Content Creator hàng đầu tại Việt Nam.',
       values: 'Giá Trị Cốt Lõi',
-      stats: {
+      statsLabel: {
         users: 'Người dùng',
         apps: 'Dự án',
         revenue: 'Khách hàng hài lòng',
@@ -28,7 +50,7 @@ const About = () => {
       vision: 'Vision',
       visionDesc: 'To become the indispensable "Secret Weapon" for every top MMO-er and Content Creator in Vietnam.',
       values: 'Core Values',
-      stats: {
+      statsLabel: {
         users: 'Active Users',
         apps: 'Projects',
         revenue: 'Happy Clients',
@@ -107,16 +129,16 @@ const About = () => {
             className="grid grid-cols-2 gap-6"
           >
             <div className="glass-card p-6 rounded-2xl text-center">
-              <div className="text-4xl font-bold gradient-text mb-2">10k+</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.stats.users}</div>
+              <div className="text-4xl font-bold gradient-text mb-2">{stats.users}</div>
+              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.users}</div>
             </div>
             <div className="glass-card p-6 rounded-2xl text-center">
-              <div className="text-4xl font-bold gradient-text mb-2">50+</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.stats.apps}</div>
+              <div className="text-4xl font-bold gradient-text mb-2">{stats.apps}</div>
+              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.apps}</div>
             </div>
             <div className="glass-card p-6 rounded-2xl text-center col-span-2">
               <div className="text-4xl font-bold gradient-text mb-2">99.9%</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.stats.revenue}</div>
+              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.revenue}</div>
             </div>
           </motion.div>
         </div>

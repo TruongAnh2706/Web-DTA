@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, Facebook, Github, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Facebook, Github, MessageCircle, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +8,32 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 const Contact = () => {
   const { language } = useLanguage();
+  const [formData, setFormData] = useState({ name: '', email: '', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.message) return;
+    
+    setIsSubmitting(true);
+    // Giả lập gửi thông tin lên server/webhook
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    setIsSubmitting(false);
+    setIsSuccess(true);
+    setFormData({ name: '', email: '', message: '' });
+    
+    // Tự động ẩn thông báo thành công sau 3 giây
+    setTimeout(() => {
+      setIsSuccess(false);
+    }, 3000);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
   const t = {
     vi: {
@@ -16,6 +43,8 @@ const Contact = () => {
       email: 'Email liên hệ',
       message: 'Nội dung tin nhắn',
       send: 'Gửi Tin Nhắn',
+      sending: 'Đang Gửi...',
+      success: 'Tin nhắn đã được gửi thành công!',
       infoTitle: 'Thông Tin Liên Hệ',
       address: 'Mã Kiều, Phương Trung, Thanh Oai, Hà Nội',
       follow: 'Theo dõi chúng tôi',
@@ -27,6 +56,8 @@ const Contact = () => {
       email: 'Contact Email',
       message: 'Your Message',
       send: 'Send Message',
+      sending: 'Sending...',
+      success: 'Message sent successfully!',
       infoTitle: 'Contact Information',
       address: 'Ma Kieu, Phuong Trung, Thanh Oai, Ha Noi',
       follow: 'Follow Us',
@@ -64,10 +95,14 @@ const Contact = () => {
             viewport={{ once: true }}
             className="glass-card p-8 rounded-3xl"
           >
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium ml-1">{texts.name}</label>
                 <Input
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
                   placeholder={language === 'vi' ? "Nhập tên của bạn" : "Enter your name"}
                   className="rounded-xl border-primary/20 focus:border-primary/50 bg-background/50 h-12"
                 />
@@ -76,6 +111,10 @@ const Contact = () => {
                 <label className="text-sm font-medium ml-1">{texts.email}</label>
                 <Input
                   type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
                   placeholder="email@example.com"
                   className="rounded-xl border-primary/20 focus:border-primary/50 bg-background/50 h-12"
                 />
@@ -83,13 +122,33 @@ const Contact = () => {
               <div className="space-y-2">
                 <label className="text-sm font-medium ml-1">{texts.message}</label>
                 <Textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  required
                   placeholder={language === 'vi' ? "Bạn cần hỗ trợ gì?" : "How can we help?"}
                   className="rounded-xl border-primary/20 focus:border-primary/50 bg-background/50 min-h-[150px]"
                 />
               </div>
-              <Button type="submit" className="w-full btn-neon rounded-xl py-6 text-background font-bold text-lg group">
-                {texts.send}
-                <Send className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+              
+              {isSuccess && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 flex items-center gap-2"
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  <span className="font-medium">{texts.success}</span>
+                </motion.div>
+              )}
+
+              <Button 
+                type="submit" 
+                disabled={isSubmitting || isSuccess}
+                className="w-full btn-neon rounded-xl py-6 text-background font-bold text-lg group"
+              >
+                {isSubmitting ? texts.sending : texts.send}
+                {!isSubmitting && <Send className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />}
               </Button>
             </form>
           </motion.div>

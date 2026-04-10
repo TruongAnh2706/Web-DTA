@@ -11,13 +11,16 @@ import {
     Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Plus, Pencil, Trash2, Eye, LayoutDashboard, Copy } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, Eye, LayoutDashboard, Copy, Sparkles, Image as ImageIcon } from 'lucide-react';
 import PostEditor from '@/components/admin/PostEditor';
+import { AIWriterModal } from '@/components/admin/AIWriterModal';
 import { format } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Link } from 'react-router-dom';
+import { AISettingsModal } from '@/components/admin/AISettingsModal';
+import { AIImageGenerator } from '@/components/admin/AIImageGenerator';
 
 const BlogManager = () => {
     const { posts, isLoading, createPost, updatePost, deletePost } = useBlog();
@@ -25,6 +28,10 @@ const BlogManager = () => {
     const { toast } = useToast();
     const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+    const [isAIImageOpen, setIsAIImageOpen] = useState(false);
+    const [isKeysOpen, setIsKeysOpen] = useState(false);
+    const [aiMode, setAiMode] = useState<'generate' | 'paraphrase'>('generate');
 
     // Form states
     const [title, setTitle] = useState('');
@@ -116,6 +123,126 @@ const BlogManager = () => {
         }
     };
 
+    if (isDialogOpen) {
+        return (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-500 pb-12">
+                <div className="flex justify-between items-center bg-background/80 backdrop-blur-md p-4 sticky top-0 z-10 border-b border-primary/20 rounded-2xl glass-card">
+                    <div className="flex items-center gap-4">
+                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                            ← Trở về
+                        </Button>
+                        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neon-blue to-neon-red">
+                            {selectedPost ? 'Chỉnh Sửa Bài Viết' : 'Sáng Tạo Bài Mới'}
+                        </h1>
+                    </div>
+                    <div className="flex gap-3">
+                        <Button variant="outline" onClick={() => setIsKeysOpen(true)} className="border-neon-blue text-neon-blue">
+                            Cấu hình API Key
+                        </Button>
+                        <Button onClick={handleSubmit} className="btn-neon" disabled={createPost.isPending || updatePost.isPending}>
+                            {createPost.isPending || updatePost.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+                            Lưu Bài Viết
+                        </Button>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+                    {/* Main Content Area */}
+                    <div className="xl:col-span-3 space-y-8">
+                        <div className="glass-card p-6 rounded-2xl border-t-4 border-t-neon-blue">
+                            <Label className="text-xl mb-4 block text-muted-foreground">Tiêu Đề (Title)</Label>
+                            <Input
+                                className="text-4xl font-black h-20 border-none bg-transparent shadow-none focus-visible:ring-0 px-0 placeholder:text-muted-foreground/30"
+                                placeholder="Nhập tiêu đề ấn tượng..."
+                                value={title}
+                                onChange={handleTitleChange}
+                            />
+                        </div>
+
+                        <div className="glass-card p-6 rounded-2xl border border-primary/10">
+                            <div className="flex items-center justify-between mb-4">
+                                <Label className="text-xl text-muted-foreground">Nội Dung Chính</Label>
+                                <div className="flex gap-2">
+                                    <Button type="button" variant="outline" size="sm" className="gap-2 text-neon-blue border-neon-blue/30" onClick={() => setIsAIImageOpen(true)}>
+                                        <ImageIcon className="w-4 h-4" /> Tạo Ảnh AI
+                                    </Button>
+                                    <Button type="button" variant="outline" size="sm" className="gap-2 bg-neon-blue/10 text-neon-blue border-neon-blue" onClick={() => { setAiMode('generate'); setIsAIModalOpen(true); }}>
+                                        <Sparkles className="w-4 h-4" /> Nhờ AI Viết Bài
+                                    </Button>
+                                </div>
+                            </div>
+                            <PostEditor content={content} onChange={setContent} />
+                            {content && (
+                                <Button type="button" variant="ghost" size="sm" className="mt-2 text-xs text-muted-foreground" onClick={() => { setAiMode('paraphrase'); setIsAIModalOpen(true); }}>
+                                    <Sparkles className="w-3 h-3 mr-2" /> Nhờ AI trau chuốt lại nội dung...
+                                </Button>
+                            )}
+                        </div>
+
+                        <div className="glass-card p-6 rounded-2xl border border-primary/10">
+                            <Label className="text-xl mb-4 block text-muted-foreground">Đoạn Trích Hiển Thị (Excerpt)</Label>
+                            <Input
+                                value={excerpt}
+                                onChange={(e) => setExcerpt(e.target.value)}
+                                placeholder="Dòng mô tả ngắn xuất hiện ở trang chủ..."
+                                className="h-14 text-lg bg-background/50"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Sidebar Settings */}
+                    <div className="space-y-6">
+                        <div className="glass-card p-6 rounded-2xl space-y-6 border border-primary/10">
+                            <h3 className="font-bold text-lg text-neon-red border-b border-primary/10 pb-2">Publishing</h3>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="published">Công Bố (Published)</Label>
+                                <Switch id="published" checked={isPublished} onCheckedChange={setIsPublished} />
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="featured">Ghim (Featured)</Label>
+                                <Switch id="featured" checked={featured} onCheckedChange={setFeatured} />
+                            </div>
+                        </div>
+
+                        <div className="glass-card p-6 rounded-2xl space-y-6 border border-primary/10">
+                            <h3 className="font-bold text-lg text-neon-blue border-b border-primary/10 pb-2">SEO & Đường Dẫn</h3>
+                            <div className="space-y-4">
+                                <Label>Slug (Đường dẫn tĩnh)</Label>
+                                <div className="flex gap-2">
+                                    <Input value={slug} onChange={(e) => setSlug(e.target.value)} className="bg-background/50" />
+                                    <Button variant="outline" size="icon" onClick={() => setSlug(generateSlug(title))}>
+                                        <Copy className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                                <p className="text-xs text-muted-foreground">Nên để tự sinh tự động từ Title.</p>
+                            </div>
+                        </div>
+
+                        <div className="glass-card p-6 rounded-2xl space-y-6 border border-primary/10">
+                            <h3 className="font-bold text-lg text-neon-blue border-b border-primary/10 pb-2">Ảnh Bìa (Media)</h3>
+                            <div className="space-y-4">
+                                <Label>Link URL Ảnh Khách Của Bài</Label>
+                                <Input value={coverImage} onChange={(e) => setCoverImage(e.target.value)} className="bg-background/50" />
+                                {coverImage && (
+                                    <div className="mt-4 rounded-xl overflow-hidden border border-border aspect-video shadow-lg">
+                                        <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <AIImageGenerator isOpen={isAIImageOpen} onClose={() => setIsAIImageOpen(false)} onInsert={(url) => setContent(prev => prev + `<p><img src="${url}" alt="AI" /></p>`)} />
+                <AIWriterModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} mode={aiMode} initialTopic={aiMode === 'generate' ? title : content} onInsert={(generatedContent) => {
+                    if (aiMode === 'generate') setContent((prev) => prev ? prev + '\n\n' + generatedContent : generatedContent);
+                    else setContent(generatedContent);
+                }} />
+                <AISettingsModal isOpen={isKeysOpen} onClose={() => setIsKeysOpen(false)} />
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex justify-between items-center">
@@ -197,111 +324,12 @@ const BlogManager = () => {
                 </Table>
             </div>
 
-            {/* Edit/Create Dialog */}
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="max-w-5xl h-[90vh] flex flex-col p-0 gap-0 bg-background/95 backdrop-blur-xl">
-                    <DialogHeader className="p-6 border-b">
-                        <DialogTitle>{selectedPost ? 'Edit Post' : 'Create New Post'}</DialogTitle>
-                    </DialogHeader>
-
-                    <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        {/* Main Content Area */}
-                        <div className="lg:col-span-2 space-y-6">
-                            <div className="space-y-2">
-                                <Label>Title</Label>
-                                <Input
-                                    className="text-lg font-bold"
-                                    placeholder="Enter post title..."
-                                    value={title}
-                                    onChange={handleTitleChange}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Content</Label>
-                                <PostEditor content={content} onChange={setContent} />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Excerpt (Short description)</Label>
-                                <Input
-                                    value={excerpt}
-                                    onChange={(e) => setExcerpt(e.target.value)}
-                                    placeholder="Brief summary for list view..."
-                                />
-                            </div>
-                        </div>
-
-                        {/* Sidebar Settings */}
-                        <div className="space-y-6">
-                            <div className="glass-card p-4 rounded-xl space-y-4">
-                                <h3 className="font-semibold text-lg">Publishing</h3>
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="published">Published</Label>
-                                    <Switch
-                                        id="published"
-                                        checked={isPublished}
-                                        onCheckedChange={setIsPublished}
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <Label htmlFor="featured">Featured Post</Label>
-                                    <Switch
-                                        id="featured"
-                                        checked={featured}
-                                        onCheckedChange={setFeatured}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="glass-card p-4 rounded-xl space-y-4">
-                                <h3 className="font-semibold text-lg">SEO & URL</h3>
-                                <div className="space-y-2">
-                                    <Label>Slug (URL)</Label>
-                                    <div className="flex gap-2">
-                                        <Input
-                                            value={slug}
-                                            onChange={(e) => setSlug(e.target.value)}
-                                            placeholder="post-url-slug"
-                                        />
-                                        <Button variant="outline" size="icon" onClick={() => setSlug(generateSlug(title))}>
-                                            <Copy className="w-4 h-4" />
-                                        </Button>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">Unique identifier for the URL.</p>
-                                </div>
-                            </div>
-
-                            <div className="glass-card p-4 rounded-xl space-y-4">
-                                <h3 className="font-semibold text-lg">Media</h3>
-                                <div className="space-y-2">
-                                    <Label>Cover Image URL</Label>
-                                    <Input
-                                        value={coverImage}
-                                        onChange={(e) => setCoverImage(e.target.value)}
-                                        placeholder="https://..."
-                                    />
-                                    {coverImage && (
-                                        <div className="mt-2 rounded-lg overflow-hidden border border-border aspect-video">
-                                            <img src={coverImage} alt="Cover" className="w-full h-full object-cover" />
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <DialogFooter className="p-6 border-t bg-muted/20">
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleSubmit} className="btn-neon" disabled={createPost.isPending || updatePost.isPending}>
-                            {createPost.isPending || updatePost.isPending ? (
-                                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                            ) : null}
-                            Save Post
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+            <AIImageGenerator isOpen={isAIImageOpen} onClose={() => setIsAIImageOpen(false)} onInsert={(url) => setContent(prev => prev + `<p><img src="${url}" alt="AI Generated" /></p>`)} />
+            <AIWriterModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} mode={aiMode} initialTopic={aiMode === 'generate' ? title : content} onInsert={(generatedContent) => {
+                if (aiMode === 'generate') setContent((prev) => prev ? prev + '\n\n' + generatedContent : generatedContent);
+                else setContent(generatedContent);
+            }} />
+            <AISettingsModal isOpen={isKeysOpen} onClose={() => setIsKeysOpen(false)} />
         </div>
     );
 };

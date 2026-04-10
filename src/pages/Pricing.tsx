@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import PaymentModal from '@/components/PaymentModal';
 
 const Pricing = () => {
     const { language } = useLanguage();
@@ -16,24 +17,36 @@ const Pricing = () => {
     const { user } = useAuth();
     const { toast } = useToast();
     const [purchasing, setPurchasing] = useState<string | null>(null);
+    
+    // State cho Modal thanh toán
+    const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+    const [selectedTier, setSelectedTier] = useState<{name: string; price: string} | null>(null);
 
-    const handlePurchase = async (tier: any) => {
+    const handlePurchase = (tier: any) => {
         if (!user) {
-            toast({ title: "Login Required", variant: "destructive" });
+            toast({ title: "Đăng nhập bắt buộc", description: "Vui lòng đăng nhập để nâng cấp", variant: "destructive" });
             return;
         }
         if (tier.price === '0') return;
 
-        setPurchasing(tier.name);
+        setSelectedTier(tier);
+        setIsPaymentOpen(true);
+    };
+
+    const handlePaymentSuccess = async () => {
+        if (!selectedTier) return;
+        setPurchasing(selectedTier.name);
         try {
-            // Parse price string "199k" -> 199000 approx logic, or just use fixed value for demo
-            const price = tier.name.includes('Pro') ? 19.00 : 49.00;
-            await purchaseApp('demo-app-id', price, tier.name);
-            toast({ title: "Purchase Successful!", description: "License key added to your Dashboard." });
+            // Giá Demo
+            const price = selectedTier.name.includes('Pro') ? 199000 : 2500000;
+            // Ở đây gọi API thật hoặc Dashboard Hook
+            await purchaseApp('vip-subscription', price, selectedTier.name);
+            toast({ title: "Nâng cấp thành công!", description: "Gói VIP đã được kích hoạt trong Dashboard." });
         } catch (error: any) {
-            toast({ title: "Purchase Failed", description: error.message, variant: "destructive" });
+            toast({ title: "Lỗi kích hoạt", description: error.message, variant: "destructive" });
         } finally {
             setPurchasing(null);
+            setSelectedTier(null);
         }
     };
 
@@ -156,6 +169,16 @@ const Pricing = () => {
             </main>
 
             <Footer />
+
+            <PaymentModal 
+                isOpen={isPaymentOpen}
+                onClose={() => {
+                    setIsPaymentOpen(false);
+                    setSelectedTier(null);
+                }}
+                tier={selectedTier}
+                onSuccess={handlePaymentSuccess}
+            />
         </div>
     );
 };
