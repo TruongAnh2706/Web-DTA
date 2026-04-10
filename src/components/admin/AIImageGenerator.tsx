@@ -76,7 +76,7 @@ export function AIImageGenerator({ isOpen, onClose, onInsert }: AIImageGenerator
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl glass-card rounded-2xl border-neon-blue/30">
+      <DialogContent className="max-w-2xl glass-card rounded-2xl border-neon-blue/30 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl font-bold text-neon-blue">
             <ImageIcon className="w-6 h-6" />
