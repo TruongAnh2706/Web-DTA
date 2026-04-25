@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { AIChatWidget } from "@/components/AIChatWidget";
+import "./pages/games/styles/index.css";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -24,6 +25,13 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const FAQ = lazy(() => import("./pages/FAQ"));
+
+// DTA Stealth Games
+const WorkspaceHub = lazy(() => import("./pages/games/WorkspaceHub"));
+const BattleshipGame = lazy(() => import("./pages/games/BattleshipGame"));
+const CaroGame = lazy(() => import("./pages/games/CaroGame"));
+const WordChainGame = lazy(() => import("./pages/games/WordChainGame"));
+const HangmanGame = lazy(() => import("./pages/games/HangmanGame"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,6 +75,13 @@ const App = () => (
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/changelog" element={<Changelog />} />
                   <Route path="/faq" element={<FAQ />} />
+
+                  {/* DTA Stealth Games */}
+                  <Route path="/workspace" element={<WorkspaceHub />} />
+                  <Route path="/workspace/diagnostic" element={<BattleshipGame />} />
+                  <Route path="/workspace/sheets" element={<CaroGame />} />
+                  <Route path="/workspace/docs" element={<WordChainGame />} />
+                  <Route path="/workspace/decrypt" element={<HangmanGame />} />
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

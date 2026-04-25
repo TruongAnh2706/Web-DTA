@@ -1,0 +1,292 @@
+/* ═══════════════════════════════════════════
+   ĐOÁN TỪ — Data Decryption Node (Terminal)
+   ═══════════════════════════════════════════ */
+
+.hangman-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0a0e17;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  color: #c8d6e5;
+  position: relative;
+}
+
+.hangman-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: rgba(15, 20, 35, 0.95);
+  border-bottom: 1px solid rgba(0, 243, 255, 0.15);
+}
+
+.hangman-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #00f3ff;
+}
+
+.hangman-main {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  overflow: auto;
+}
+
+.hangman-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.hangman-right {
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Decryption Board ── */
+.decryption-board {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
+.decryption-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #556;
+  margin-bottom: 24px;
+}
+
+.hash-display {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hash-char {
+  width: 48px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 24px;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+
+.hash-char.hidden {
+  background: rgba(0, 243, 255, 0.08);
+  border: 1px solid rgba(0, 243, 255, 0.2);
+  color: rgba(0, 243, 255, 0.4);
+}
+
+.hash-char.revealed {
+  background: rgba(0, 243, 255, 0.15);
+  border: 1px solid rgba(0, 243, 255, 0.5);
+  color: #00f3ff;
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+  animation: revealChar 0.4s ease;
+}
+
+.hash-char.missed {
+  background: rgba(255, 0, 60, 0.12);
+  border-color: rgba(255, 0, 60, 0.3);
+  color: #ff003c;
+}
+
+@keyframes revealChar {
+  0% { transform: scale(1.3); opacity: 0.5; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ── Corruption Bar ── */
+.corruption-bar {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 16px 24px;
+}
+
+.corruption-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 12px;
+  color: #778;
+}
+
+.corruption-value {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.corruption-track {
+  height: 8px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.corruption-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: all 0.5s ease;
+}
+
+.corruption-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #445;
+}
+
+/* ── Virtual Keyboard ── */
+.virtual-keyboard {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.keyboard-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #556;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.keyboard-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 6px;
+}
+
+.key-btn {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  color: #aab;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.key-btn.available:hover {
+  background: rgba(0, 243, 255, 0.12);
+  border-color: rgba(0, 243, 255, 0.3);
+  color: #00f3ff;
+  box-shadow: 0 0 8px rgba(0, 243, 255, 0.15);
+}
+
+.key-btn.correct {
+  background: rgba(0, 243, 255, 0.15);
+  border-color: rgba(0, 243, 255, 0.5);
+  color: #00f3ff;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.2);
+  cursor: default;
+}
+
+.key-btn.wrong {
+  background: rgba(255, 0, 60, 0.08);
+  border-color: rgba(255, 0, 60, 0.3);
+  color: rgba(255, 0, 60, 0.4);
+  opacity: 0.5;
+  cursor: default;
+  animation: wrongKey 0.4s ease;
+}
+
+@keyframes wrongKey {
+  0%, 100% { box-shadow: none; }
+  50% { box-shadow: 0 0 8px rgba(255, 0, 60, 0.4); }
+}
+
+.key-btn:disabled { cursor: default; }
+
+/* ── System Log ── */
+.system-log {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.log-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  font-size: 12px;
+  color: #556;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+
+.log-count {
+  margin-left: auto;
+  background: rgba(255,255,255,0.06);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 10px;
+}
+
+.log-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  font-size: 11px;
+  line-height: 1.8;
+}
+
+.log-line { color: #667; }
+.log-line.failed { color: #ff003c; }
+.log-line.success { color: #34a853; }
+
+/* ── Game Over (Decrypt variant) ── */
+.gameover-overlay.decrypt .gameover-card {
+  max-width: 400px;
+}
+
+@media (max-width: 768px) {
+  .hangman-main { flex-direction: column; }
+  .hangman-right { width: 100%; }
+  .key-btn { width: 34px; height: 34px; font-size: 12px; }
+  .hash-char { width: 36px; height: 44px; font-size: 18px; }
+}

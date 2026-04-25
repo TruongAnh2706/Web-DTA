@@ -1,0 +1,28 @@
+@System Role: Bạn là một chuyên gia Senior Frontend Developer về Stealth UI. Hãy xây dựng trò chơi Nối từ (Word Chain) ngụy trang hoàn hảo dưới giao diện một trình soạn thảo văn bản giống Google Docs, tên là "DTA Collaborative Docs".
+
+@Tech Stack: Next.js, Tailwind CSS, Lucide React.
+
+@Yêu cầu về giao diện (UI):
+1. Layout tổng thể (Docs Interface):
+- Background ngoài cùng màu xám nhạt (bg-gray-100).
+- Toolbar (Thanh công cụ) phía trên cùng màu trắng, chứa các icon cơ bản của trình soạn thảo văn bản: Bold, Italic, Underline, Alignments, Font Style (sử dụng Lucide React).
+- Main Content: Một "Trang giấy" màu trắng (bg-white) nằm ở giữa, đổ bóng nhẹ (shadow-md), có padding rộng rãi giống khổ giấy A4.
+- Sidebar (Cột bên phải): Khu vực "Revision / Comments" (Bình luận/Chỉnh sửa), sử dụng hiệu ứng Glassmorphism mờ nhẹ đặc trưng của DTA Studio.
+
+2. Trạng thái Game & Tương tác (Stealth Mode):
+- Khu vực soạn thảo (Trang giấy): Hiển thị các từ đã được nối thành công dưới dạng một danh sách (Bulleted list). Tiêu đề trang giấy ghi là: "Danh sách Từ khóa SEO chiến lược Q3".
+- Input Area: Phía dưới dòng cuối cùng, hiển thị một con trỏ nhấp nháy màu Neon Blue (#00f3ff) để người chơi gõ từ tiếp theo.
+- Hệ thống Validation (Kiểm tra luật chơi): 
+  + Nếu nhập hợp lệ: Từ đó được thêm vào danh sách bình thường. Dòng log nhỏ ở góc: "Auto-saved".
+  + Nếu nhập sai (không nối từ hoặc từ không có nghĩa): Từ đó xuất hiện trên giấy nhưng bị gạch chân lượn sóng màu đỏ (style decoration-wavy). Đồng thời, Sidebar bên phải sẽ trượt ra một thẻ Comment: "[System AI]: Lỗi ngữ nghĩa/Từ khóa không khớp chuỗi. Vui lòng cập nhật lại." (Viền thẻ comment nháy nhẹ màu Neon Red #ff003c).
+
+3. Hiển thị Multiplayer (Realtime presence):
+- Ở thanh Toolbar góc phải, hiển thị các Avatar tròn nhỏ xíu (viền màu khác nhau) để giả lập có nhiều người đang cùng xem tài liệu (giống Google Docs).
+
+4. Tính năng "Boss Key":
+- Phím tắt: Nhấn `Esc` để lập tức ẩn toàn bộ Sidebar Comments đi, làm mờ con trỏ màu Neon, giao diện trở thành một trang văn bản tĩnh hoàn toàn vô hại, không thể tương tác cho đến khi nhấn `Esc` lần nữa để "Unlock" chỉnh sửa.
+
+@Yêu cầu Code:
+- Quản lý state bằng `useState` (danh sách các từ đã nối hợp lệ, từ đang gõ, trạng thái lỗi).
+- Chia component: `DocsToolbar`, `PaperPage`, `WordList`, `CommentSidebar`.
+- Từ ngữ trên giao diện TUYỆT ĐỐI không dùng các từ "Game", "Play", "Turn", "Win", "Lose". Chỉ dùng "Sync", "Keywords", "Draft", "Review", "Revision".

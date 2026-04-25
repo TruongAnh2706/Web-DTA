@@ -1,0 +1,31 @@
+@System Role: Bạn là một chuyên gia Frontend Developer giỏi nhất về UI/UX ngụy trang (Stealth UI). Hãy viết code cho một trang web có giao diện giả lập hoàn toàn Google Drive/Workspace.
+
+@Tech Stack: Next.js (React), Tailwind CSS, Lucide React (cho icon).
+
+@Yêu cầu chi tiết:
+1. Tổng quan UI: 
+- Thiết kế layout bao gồm Header ở trên, Sidebar bên trái và Main Content ở giữa (giống hệt Google Drive).
+- Màu sắc chủ đạo: Trắng sáng, xám nhạt của nền Google Workspace. Các trạng thái hover/active sử dụng màu Neon Blue (#00f3ff) nhưng được giảm opacity xuống 10% để giữ sự tinh tế, không bị lố.
+- Font chữ: Inter hoặc Roboto (chuẩn form văn phòng).
+
+2. Header Components:
+- Logo góc trái: Text "DTA Workspace" đi kèm icon Google Drive (nhưng đổi nhẹ thành hình khối 3D kính mờ Glassmorphism).
+- Thanh Search trung tâm: Box tìm kiếm dài, placeholder là "🔍 Nhập mã Session ID để đồng bộ tài liệu...". Khi user nhập số và nhấn Enter, hãy hiện một toast notification nhỏ: "Đang kết nối tới Node [Mã số]...".
+- Góc phải: Avatar User tròn (có thể dùng ảnh placeholder random) và icon răng cưa (Settings).
+
+3. Sidebar Components (Cột trái):
+- Nút "Mới" (New) to, nổi bật, bo góc. Khi click vào sẽ mở một Modal (Popup).
+- Trong Modal "Mới" hiển thị: "Khởi tạo Session làm việc" -> Chứa 1 nút "Generate ID" để tạo phòng. Khi click sẽ hiện ra 1 mã số ngẫu nhiên 4 chữ số.
+- Danh sách thư mục điều hướng: Sử dụng các icon Folder của Lucide. Tên thư mục lần lượt là: "Ổ đĩa của tôi", "Phân vùng TÂM", "Phân vùng TẦM", "Data TÀI", "Backup TÍN".
+
+4. Main Content (Khu vực giữa):
+- Tiêu đề nhỏ: "Tài liệu đang mở gần đây".
+- Render một Grid hiển thị các "File" (chính là các game). Mỗi file là một Card có viền xám nhạt, hover vào bóng đổ nhẹ.
+- Card 1: Icon Word màu xanh dương (Lucide FileText). Tên: "Báo_cáo_kế_hoạch_Q2.docx". Subtitle: "Chỉnh sửa lần cuối: Vừa xong".
+- Card 2: Icon Excel màu xanh lá (Lucide Sheet). Tên: "Data_Phân_tích_hành_vi.xlsx". Subtitle: "Chỉnh sửa lần cuối: 5 phút trước".
+- Card 3: Icon Chart màu đỏ/cam (Lucide BarChart). Tên: "Thống_kê_tăng_trưởng.pdf". Subtitle: "Chỉnh sửa lần cuối: 1 giờ trước".
+
+@Luồng tương tác:
+- Giao diện phải responsive.
+- Không cần viết logic backend Realtime vội, chỉ cần làm chuẩn Pixel-perfect giao diện UI/UX và các hiệu ứng hover, click modal, hiển thị toast notification. 
+- Viết code thật sạch, chia Component rõ ràng để tôi dễ dàng gắn logic Supabase/WebSockets vào sau.

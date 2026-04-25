@@ -1,0 +1,33 @@
+@System Role: Bạn là chuyên gia Senior Frontend Developer. Hãy xây dựng một trò chơi Cờ Caro (Gomoku) được ngụy trang hoàn hảo dưới giao diện Google Sheets (DTA Sheets).
+
+@Tech Stack: Next.js, Tailwind CSS, Lucide React.
+
+@Yêu cầu về giao diện (UI):
+1. Khung bảng tính: 
+- Tạo một lưới (Grid) 15x15 hoặc 19x19 ô. Mỗi ô có viền xám nhạt (border-gray-200).
+- Phía trên bảng là thanh công cụ (Toolbar) giả lập Google Sheets với các icon: In đậm, In nghiêng, Đổi màu chữ, Căn lề, và biểu đồ.
+- Phía trái là các số hàng (1, 2, 3...), phía trên là các tên cột (A, B, C...).
+- Sử dụng hiệu ứng Glassmorphism nhẹ cho phần Sidebar và Header để giữ chất DTA Studio.
+
+2. Trạng thái Game (Stealth Mode):
+- Khi click vào một ô trống, ô đó sẽ cho phép "nhập liệu".
+- Người chơi 1: Khi đánh vào, ô hiển thị text "[DONE]" (màu xanh lá đậm trên nền xanh nhạt).
+- Người chơi 2: Khi đánh vào, ô hiển thị text "[PENDING]" (màu nâu đậm trên nền vàng nhạt).
+- Font chữ sử dụng font 'Roboto Mono' hoặc 'Consolas' để trông giống dữ liệu hệ thống.
+
+3. Logic Game:
+- Viết hàm kiểm tra thắng thua (5 ô liên tiếp theo hàng ngang, dọc, chéo).
+- Khi có người thắng, hãy hiển thị một thông báo cực kỳ tinh tế ở góc dưới: "Data Synchronization Complete (Node [X/O] Winner)".
+- Có nút "Reset Data" (thực chất là New Game) nằm ở vị trí nút "Làm mới dữ liệu".
+
+4. Tính năng "Boss Key":
+- Lập trình sự kiện phím tắt: Khi nhấn phím `Esc`, ngay lập tức ẩn bàn cờ và hiển thị một ảnh chụp màn hình hoặc một bảng dữ liệu giả lập đầy các con số tài chính phức tạp. Nhấn `Esc` lần nữa để quay lại.
+
+5. Hiệu ứng DTA Studio:
+- Khi đến lượt người chơi, con trỏ chuột (Cell Selector) sẽ có viền sáng màu Neon Blue.
+- Nếu có lỗi (đánh vào ô đã có quân), viền ô đó sẽ nháy nhẹ màu Neon Red.
+
+@Yêu cầu Code: 
+- Quản lý trạng thái bàn cờ bằng `useState` hoặc `useReducer`. 
+- Code sạch, chia nhỏ các component: `SheetHeader`, `Toolbar`, `Grid`, `Cell`. 
+- Đảm bảo giao diện trông "Pixel-perfect" so với Google Sheets thật ở chế độ Dark Mode hoặc Light Mode tùy chọn.

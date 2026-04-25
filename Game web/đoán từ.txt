@@ -1,0 +1,35 @@
+@System Role: Bạn là chuyên gia Senior Frontend Developer về Stealth UI. Hãy xây dựng trò chơi Đoán từ (Hangman) được ngụy trang dưới dạng công cụ giải mã dữ liệu: "Data Decryption Node".
+
+@Tech Stack: Next.js, Tailwind CSS, Lucide React.
+
+@Yêu cầu về giao diện (UI):
+1. Khung hiển thị (Terminal Interface):
+- Giao diện tối (Dark mode) giống cửa sổ Terminal hoặc phần mềm nội bộ, sử dụng hiệu ứng Glassmorphism viền mờ.
+- Font chữ: Sử dụng 'Fira Code' hoặc monospace cho toàn bộ text.
+- Phía trên cùng có thanh Header nhỏ ghi: "DTA-NODE // Secure Data Decryption Protocol".
+
+2. Khu vực hiển thị từ khóa (Decryption Target):
+- Hiển thị từ cần đoán dưới dạng chuỗi Hash bị ẩn. Ví dụ từ "SYSTEM" sẽ hiển thị thành `[ * * * * * * ]` với kích thước chữ to, rõ ràng, màu Neon Blue (#00f3ff).
+
+3. Khu vực nhập liệu (Key Injector) & Bàn phím:
+- Tạo một bàn phím ảo (QWERTY layout) bằng các nút bấm vuông vức, viền mờ.
+- Khi user click vào một chữ cái (hoặc gõ phím vật lý):
+  + Nếu ĐÚNG: Nút đó sáng đèn màu Neon Blue, chữ cái mở khóa trên chuỗi Hash.
+  + Nếu SAI: Nút đó mờ đi (disabled) và có viền nháy Neon Red (#ff003c).
+
+4. Khu vực trạng thái rủi ro (Corruption Status):
+- Thay vì hình vẽ người treo cổ, hãy dùng một thanh Progress Bar nằm ngang hoặc dọc tên là "System Corruption Level".
+- Trạng thái bắt đầu là 0%. Cho phép tối đa 6 lần đoán sai. Mỗi lần đoán sai, thanh này tăng lên (tương đương ~16.6%).
+- Màu sắc thanh tiến trình: Chuyển dần từ Xanh lục -> Vàng cam -> Đỏ rực (Neon Red) khi tiến gần đến 100%.
+
+5. Khung System Log:
+- Một ô text nhỏ hiển thị lịch sử nhập. 
+- Mẫu log: `> Injecting Key 'A' ... [FAILED] - Security warning.` hoặc `> Injecting Key 'E' ... [SUCCESS] - Match found.`
+
+@Tính năng "Boss Key":
+- Lập trình sự kiện: Nhấn phím `Esc` để lập tức ẩn bàn phím và thanh trạng thái, giao diện chuyển sang hiển thị một màn hình "Updating System 14%" giả mạo cực kỳ vô hại.
+
+@Yêu cầu Code:
+- Quản lý state bằng `useState` (lưu trữ từ khóa, các chữ cái đã đoán, số lần đoán sai).
+- Chia component hợp lý: `DecryptionBoard`, `VirtualKeyboard`, `CorruptionBar`, `SystemLog`.
+- Giao diện phải cực kỳ nghiêm túc, không có bất kỳ từ ngữ nào liên quan đến "Game", "Play", "Win", "Lose" hiển thị ra bên ngoài. Dùng "Decrypted", "System Locked".
