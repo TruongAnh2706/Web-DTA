@@ -270,9 +270,17 @@ export default function WordChainGame() {
         else newScores[0]++;
         return newScores;
       });
+      switchTurn();
+    } else {
+      // Đối thủ nhập sai -> mình thắng
+      setComments(prev => [...prev, { text: `Đối thủ đã nhập sai từ "${word}" và bị xử thua!`, timestamp: now, type: "system" }]);
+      const myNumber = gameRoom.isHost ? 1 : 2;
+      setWinner(myNumber as 1 | 2);
+      setPhase("finished");
+      setTimerRunning(false);
+      toast.success("Đối thủ nhập sai từ. Bạn thắng!");
     }
-    switchTurn();
-  }, [gameRoom.isHost]);
+  }, [gameRoom.isHost, switchTurn]);
 
   const handleRemoteTimeout = useCallback(() => {
     // Đối thủ hết giờ → mình thắng
@@ -499,7 +507,7 @@ export default function WordChainGame() {
           <div className="turn-timer-wrapper">
             <GameTimer
               duration={TURN_DURATION}
-              isRunning={timerRunning && isMyTurn}
+              isRunning={timerRunning}
               onTimeout={handleTimeout}
               label="Response Timeout"
               className="light"

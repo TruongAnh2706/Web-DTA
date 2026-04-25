@@ -143,8 +143,8 @@ function SheetCell({
   isErrorFlash: boolean;
 }) {
   const getDisplay = () => {
-    if (value === 1) return <span className="cell-done">[DONE]</span>;
-    if (value === 2) return <span className="cell-pending">[PENDING]</span>;
+    if (value === 1) return <span className="cell-done" style={{ color: '#ef4444', fontSize: '1.2rem', fontWeight: 'bold' }}>X</span>;
+    if (value === 2) return <span className="cell-pending" style={{ color: '#3b82f6', fontSize: '1.2rem', fontWeight: 'bold' }}>O</span>;
     return null;
   };
 
@@ -437,13 +437,13 @@ export default function CaroGame() {
           <div className="turn-info" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
             <User size={14} />
             <span style={{ color: isMyTurn ? '#4caf50' : 'var(--text-secondary)' }}>
-              {isMyTurn ? `🟢 Lượt của bạn (Node ${currentPlayer === 1 ? "DONE" : "PENDING"})` : `⏳ Đang chờ Node ${currentPlayer === 1 ? "DONE" : "PENDING"}...`}
+              {isMyTurn ? `🟢 Lượt của bạn (Node ${currentPlayer === 1 ? "X" : "O"})` : `⏳ Đang chờ Node ${currentPlayer === 1 ? "X" : "O"}...`}
             </span>
           </div>
           <div className="turn-timer-wrapper" style={{ width: 200 }}>
             <GameTimer
               duration={TURN_DURATION}
-              isRunning={timerRunning && isMyTurn}
+              isRunning={timerRunning}
               onTimeout={handleTimeout}
               label="Sync Timeout"
               className="light"
@@ -489,7 +489,7 @@ export default function CaroGame() {
         <div className="caro-result" style={{ margin: '20px auto', maxWidth: 600, padding: 20, border: "1px solid #34a853", borderRadius: 8, background: "rgba(52, 168, 83, 0.05)" }}>
           <div className="result-banner" style={{ textAlign: "center" }}>
             <h3 style={{ color: "#34a853", marginBottom: 10 }}>
-              {`Data Synchronization Complete — Node ${winner === 1 ? "DONE" : "PENDING"} Winner`}
+              {`Data Synchronization Complete — Node ${winner === 1 ? "X" : "O"} Winner`}
             </h3>
             <p style={{ marginBottom: 5 }}>Tổng số bản ghi (Moves): {moveCount}</p>
             <button className="reset-data-btn" onClick={handleReset} style={{ marginTop: 15 }}>
@@ -508,10 +508,10 @@ export default function CaroGame() {
             Trạng thái:{" "}
             {winner
               ? `Data Synchronization Complete (Node ${
-                  winner === 1 ? "DONE" : "PENDING"
+                  winner === 1 ? "X" : "O"
                 } Winner)`
               : `Đang chờ Node ${
-                  currentPlayer === 1 ? "DONE" : "PENDING"
+                  currentPlayer === 1 ? "X" : "O"
                 } nhập liệu...`}
           </span>
         </div>
