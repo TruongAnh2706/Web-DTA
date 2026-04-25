@@ -298,11 +298,6 @@ export default function WordChainGame() {
     setTimerRunning(false);
   }, [gameRoom.isHost]);
 
-  // ── Switch turn ──
-  const switchTurn = useCallback(() => {
-    setCurrentTurn(prev => prev === 1 ? 2 : 1);
-    setTimerRunning(true); // Reset timer cho lượt mới
-  }, []);
 
   // ── Handle timeout (hết giờ) ──
   const handleTimeout = useCallback(() => {
