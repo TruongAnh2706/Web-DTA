@@ -200,6 +200,16 @@
   border-color: rgba(0, 243, 255, 0.2);
 }
 
+.node-cell.hovering-valid {
+  background: rgba(52, 168, 83, 0.2);
+  border-color: rgba(52, 168, 83, 0.5);
+}
+
+.node-cell.hovering-invalid {
+  background: rgba(255, 0, 60, 0.2);
+  border-color: rgba(255, 0, 60, 0.5);
+}
+
 .node-cell.miss {
   background: rgba(52, 168, 83, 0.08);
   border-color: rgba(52, 168, 83, 0.2);
