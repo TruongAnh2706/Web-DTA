@@ -257,6 +257,12 @@ export default function WordChainGame() {
     startGame();
   }, [gameRoom, startGame]);
 
+  // ── Switch turn ──
+  const switchTurn = useCallback(() => {
+    setCurrentTurn(prev => prev === 1 ? 2 : 1);
+    setTimerRunning(true); // Reset timer cho lượt mới
+  }, []);
+
   // ── Handle remote word (multiplayer) ──
   const handleRemoteWord = useCallback((word: string, player: string, valid: boolean) => {
     const now = new Date().toLocaleTimeString("vi-VN");
