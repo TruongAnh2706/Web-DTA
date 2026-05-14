@@ -4,6 +4,7 @@ import { X, Wallet, CreditCard, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuthContext } from '@/contexts/AuthContext';
 
 interface WalletModalProps {
     isOpen: boolean;
@@ -13,8 +14,11 @@ interface WalletModalProps {
 
 const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
     const { language } = useLanguage();
+    const { user } = useAuthContext();
     const [amount, setAmount] = useState('');
     const [showQR, setShowQR] = useState(false);
+
+    const shortId = user?.id ? user.id.split('-')[0].toUpperCase() : '0000';
 
     const t = {
         vi: {
@@ -68,7 +72,7 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-bold">{texts.title}</h2>
-                                        <p className="text-xs text-muted-foreground font-mono">ID: 8839-2910</p>
+                                        <p className="text-xs text-muted-foreground font-mono">ID: {shortId}</p>
                                     </div>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">

@@ -23,7 +23,6 @@ const AnimatedBackground = () => {
     const interval = 1000 / fps;
     let isVisible = true;
 
-    // Get theme colors from CSS variables
     const getThemeColors = () => {
       const computedStyle = getComputedStyle(document.documentElement);
       const cyan = computedStyle.getPropertyValue('--neon-cyan').trim() || '185 100% 50%';
@@ -32,6 +31,13 @@ const AnimatedBackground = () => {
     };
 
     let themeColors = getThemeColors();
+
+    // Lắng nghe thay đổi theme (thông qua MutationObserver trên thẻ html class) 
+    // hoặc đơn giản là lấy lại màu mỗi khung hình hoặc interval. Vì lấy mỗi frame tốn kém, 
+    // ta sẽ update themeColors mỗi khi resize hoặc 2 giây 1 lần
+    setInterval(() => {
+        themeColors = getThemeColors();
+    }, 2000);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -47,7 +53,7 @@ const AnimatedBackground = () => {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      themeColors = getThemeColors(); // Update colors on resize (which might happen on theme switch sometimes?? No, explicit theme dep is better)
+      themeColors = getThemeColors(); 
     };
 
     class Particle {
@@ -57,7 +63,7 @@ const AnimatedBackground = () => {
       speedX: number;
       speedY: number;
       opacity: number;
-      color: string;
+      isCyan: boolean;
       depth: number;
 
       constructor() {
@@ -71,11 +77,8 @@ const AnimatedBackground = () => {
         this.speedX = (Math.random() - 0.5) * baseSpeed * 2;
         this.speedY = (Math.random() - 0.5) * baseSpeed * 2;
 
-        // Tăng opacity tối thiếu lên 0.3 (trước là 0.15) để rõ hơn trên nền sáng
         this.opacity = 0.3 + this.depth * 0.5;
-
-        // Use colors from CSS variables
-        this.color = Math.random() > 0.5 ? themeColors.cyan : themeColors.red;
+        this.isCyan = Math.random() > 0.5;
       }
 
       update() {
@@ -94,8 +97,9 @@ const AnimatedBackground = () => {
         if (!ctx) return;
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        // Use modern HSL syntax: hsl(H S L / A) co support space-separated vars
-        ctx.fillStyle = `hsl(${this.color} / ${this.opacity})`;
+        
+        const currentColor = this.isCyan ? themeColors.cyan : themeColors.red;
+        ctx.fillStyle = `hsl(${currentColor} / ${this.opacity})`;
         ctx.fill();
       }
     }
@@ -174,7 +178,7 @@ const AnimatedBackground = () => {
       }
       observer.disconnect();
     };
-  }, [theme]); // Re-run when theme changes
+  }, []); // Remove theme dependency to prevent reset on theme change
 
   return (
     <div ref={containerRef} className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">

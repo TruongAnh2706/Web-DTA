@@ -53,11 +53,11 @@ const Auth = () => {
       noAccount: 'Chưa có tài khoản?',
       hasAccount: 'Đã có tài khoản?',
       loginSuccess: 'Đăng nhập thành công!',
-      signupSuccess: 'Tạo tài khoản thành công!',
-      resetSuccess: 'Link khôi phục đã được gửi tới email của bạn!',
-      error: 'Lỗi xác thực',
+      signupSuccess: 'Chào mừng bạn đến với DTA Studio!',
+      resetSuccess: 'Link khôi phục đã được gửi. Hãy kiểm tra hộp thư của bạn nhé!',
+      error: 'Oops! Có chút trục trặc',
       backToLogin: 'Quay lại đăng nhập',
-      forgotDescription: 'Nhập địa chỉ email của bạn và chúng tôi sẽ gửi cho bạn một đường dẫn để khôi phục mật khẩu.',
+      forgotDescription: 'Bạn lỡ quên mật khẩu? Đừng lo lắng! Hãy nhập email đăng ký, chúng tôi sẽ gửi ngay liên kết để bạn đặt lại mật khẩu mới chỉ trong chớp mắt.',
     },
   };
 
@@ -135,43 +135,57 @@ const Auth = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Họ tên - Chỉ hiển thị khi đăng ký */}
-            {!isLogin && !isForgotPassword && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">{texts.fullName}</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10 rounded-xl"
-                    placeholder={language === 'vi' ? 'Nhập họ và tên' : 'Enter your full name'}
-                    required={!isLogin && !isForgotPassword}
-                  />
-                </div>
-              </div>
-            )}
+            <AnimatePresence mode="popLayout">
+              {/* Họ tên - Chỉ hiển thị khi đăng ký */}
+              {!isLogin && !isForgotPassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-2 overflow-hidden"
+                >
+                  <Label htmlFor="fullName">{texts.fullName}</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="pl-10 rounded-xl"
+                      placeholder={language === 'vi' ? 'Nhập họ và tên' : 'Enter your full name'}
+                      required={!isLogin && !isForgotPassword}
+                    />
+                  </div>
+                </motion.div>
+              )}
 
-            {/* SĐT - Chỉ hiển thị khi đăng ký */}
-            {!isLogin && !isForgotPassword && (
-              <div className="space-y-2">
-                <Label htmlFor="phone">{texts.phone}</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="pl-10 rounded-xl"
-                    placeholder={language === 'vi' ? 'Nhập số điện thoại' : 'Enter your phone number'}
-                    required={!isLogin && !isForgotPassword}
-                  />
-                </div>
-              </div>
-            )}
+              {/* SĐT - Chỉ hiển thị khi đăng ký */}
+              {!isLogin && !isForgotPassword && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="space-y-2 overflow-hidden"
+                >
+                  <Label htmlFor="phone">{texts.phone}</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="pl-10 rounded-xl"
+                      placeholder={language === 'vi' ? 'Nhập số điện thoại' : 'Enter your phone number'}
+                      required={!isLogin && !isForgotPassword}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <div className="space-y-2">
               <Label htmlFor="email">{texts.email}</Label>

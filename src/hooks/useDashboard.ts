@@ -108,11 +108,26 @@ export const useDashboard = () => {
             if (txError) throw txError;
 
             // 3. Fetch Licenses
-            const { data: licData, error: licError } = await (supabase as any)
+            const { data: licDataRaw, error: licError } = await (supabase as any)
                 .from('licenses')
-                .select('*, app:apps(title, icon_name)')
+                .select('*')
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
+
+            if (licError) throw licError;
+            
+            // 4. Fetch Apps manually for mapping
+            const { data: appsData } = await supabase.from('apps').select('id, title, title_vi, icon_name');
+            const appsList = appsData || [];
+            
+            // Map licData với apps data
+            const licData = (licDataRaw || []).map((lic: any) => {
+                const appInfo = appsList.find(a => a.id === lic.app_id || a.id.toString() === lic.app_id) || { title: 'Unknown App', icon_name: 'Box' };
+                return {
+                    ...lic,
+                    app: { title: appInfo.title, icon_name: appInfo.icon_name }
+                };
+            });
 
             if (licError) throw licError;
 
@@ -145,47 +160,28 @@ export const useDashboard = () => {
         purchaseApp: async (appId: string, price: number, appTitle: string) => {
             if (!user) throw new Error('User not logged in');
 
-            // Mock Purchase Logic
             if (usingMock) {
-                // Simulate network delay
+                // (Giữ logic mock dự phòng nếu có lỗi db)
                 await new Promise(resolve => setTimeout(resolve, 1000));
-
-                if ((data?.wallet.balance || 0) < price) {
-                    throw new Error('Insufficient balance');
-                }
-
-                // Update local mock data
-                const newTx: Transaction = {
-                    id: Math.random().toString(),
-                    type: 'purchase',
-                    amount: -price,
-                    description: `Purchase: ${appTitle}`,
-                    status: 'completed',
-                    created_at: new Date().toISOString(),
-                };
-
-                const newLicense: License = {
-                    id: Math.random().toString(),
-                    app_id: appId,
-                    app: { title: appTitle, icon_name: 'Box' },
-                    license_key: `mock-key-${Math.random().toString(36).substring(7)}`,
-                    status: 'active',
-                    expires_at: null,
-                    created_at: new Date().toISOString(),
-                };
-
-                setData(prev => prev ? ({
-                    ...prev,
-                    wallet: { balance: prev.wallet.balance - price },
-                    transactions: [newTx, ...prev.transactions],
-                    licenses: [newLicense, ...prev.licenses]
-                }) : null);
-
-                return { success: true, licenseKey: newLicense.license_key };
+                return { success: true, licenseKey: 'mock-key' };
             }
 
-            // Real logic would go here (call RPC or API)
-            throw new Error('Real purchase not implemented. Please run DB migration.');
+            // Real logic: Insert a pending transaction for admin to verify
+            const newTx = {
+                user_id: user.id,
+                type: 'deposit', // using deposit as it requires manual money transfer check
+                amount: price,
+                description: `Chuyển khoản mua: ${appTitle}`,
+                status: 'pending'
+            };
+            
+            const { error: txError } = await (supabase as any).from('transactions').insert(newTx);
+            if (txError) throw txError;
+            
+            // Re-fetch để update dashboard
+            await fetchDashboardData();
+            
+            return { success: true, pending: true };
         }
     };
 };

@@ -99,7 +99,7 @@ const Dashboard = () => {
                                     {language === 'vi' ? 'Số dư' : 'Balance'}
                                 </div>
                                 <div className="text-2xl font-bold gradient-text">
-                                    ${walletBalance.toFixed(2)}
+                                    {walletBalance.toLocaleString('vi-VN')} đ
                                 </div>
                             </div>
                             <Link to="/pricing">
@@ -160,7 +160,7 @@ const Dashboard = () => {
                                         <div className="text-sm font-semibold text-muted-foreground">{language === 'vi' ? 'Tổng chi tiêu' : 'Total Spent'}</div>
                                     </div>
                                     <div className="text-3xl font-bold">
-                                        ${Math.abs(data?.transactions.filter(t => t.type === 'purchase').reduce((acc, curr) => acc + curr.amount, 0) || 0).toFixed(2)}
+                                        {Math.abs(data?.transactions.filter(t => t.type === 'purchase').reduce((acc, curr) => acc + curr.amount, 0) || 0).toLocaleString('vi-VN')} đ
                                     </div>
                                 </div>
                             </div>

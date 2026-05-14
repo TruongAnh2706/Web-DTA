@@ -52,9 +52,9 @@ const Pricing = () => {
 
     const tiers = [
         {
-            name: language === 'vi' ? 'Miễn Phí' : 'Free Starter',
+            name: language === 'vi' ? 'Gói Trải Nghiệm' : 'Free Starter',
             price: '0',
-            description: language === 'vi' ? 'Cho người mới bắt đầu' : 'For beginners',
+            description: language === 'vi' ? 'Dành cho người mới tiếp cận' : 'For beginners',
             features: [
                 language === 'vi' ? 'Truy cập các tool cơ bản' : 'Access basic tools',
                 language === 'vi' ? 'Tốc độ tải xuống tiêu chuẩn' : 'Standard download speed',
@@ -64,29 +64,29 @@ const Pricing = () => {
             highlight: false,
         },
         {
-            name: language === 'vi' ? 'Chuyên Nghiệp' : 'Pro Creator',
+            name: language === 'vi' ? 'Gói DTA Pro' : 'Pro Creator',
             price: '199k',
             period: language === 'vi' ? '/tháng' : '/month',
-            description: language === 'vi' ? 'Cho người dùng chuyên sâu' : 'For power users',
+            description: language === 'vi' ? 'Dành cho người dùng chuyên sâu' : 'For power users',
             features: [
                 language === 'vi' ? 'Mở khóa tất cả Premium tools' : 'Unlock all Premium tools',
-                language === 'vi' ? 'Tốc độ tải xuống cực nhanh' : 'High-speed downloads',
-                language === 'vi' ? 'Hỗ trợ ưu tiên' : 'Priority support',
-                language === 'vi' ? 'Cập nhật sớm nhất' : 'Early access updates',
+                language === 'vi' ? 'Tốc độ tải xuống không giới hạn' : 'High-speed downloads',
+                language === 'vi' ? 'Hỗ trợ ưu tiên 24/7' : 'Priority support',
+                language === 'vi' ? 'Nhận bản cập nhật sớm nhất' : 'Early access updates',
             ],
             icon: Shield,
             highlight: true,
         },
         {
-            name: language === 'vi' ? 'V.I.P Trọn Đời' : 'Lifetime VIP',
+            name: language === 'vi' ? 'Độc Quyền (Lifetime)' : 'Lifetime VIP',
             price: '2.5m',
             period: language === 'vi' ? '/lần' : '/once',
-            description: language === 'vi' ? 'Thanh toán một lần duy nhất' : 'One-time payment',
+            description: language === 'vi' ? 'Đầu tư 1 lần, lợi ích mãi mãi' : 'One-time payment',
             features: [
-                language === 'vi' ? 'Tất cả tính năng PRO' : 'All PRO features',
-                language === 'vi' ? 'Quyền truy cập mã nguồn' : 'Source code access',
-                language === 'vi' ? 'Hỗ trợ trực tiếp 1:1' : '1:1 Direct support',
-                language === 'vi' ? 'Huy hiệu VIP độc quyền' : 'Exclusive VIP badge',
+                language === 'vi' ? 'Sở hữu vĩnh viễn tính năng PRO' : 'All PRO features',
+                language === 'vi' ? 'Đặc quyền tiếp cận mã nguồn' : 'Source code access',
+                language === 'vi' ? 'Kênh hỗ trợ trực tiếp 1:1' : '1:1 Direct support',
+                language === 'vi' ? 'Huy hiệu VIP siêu phẩm' : 'Exclusive VIP badge',
             ],
             icon: Crown,
             highlight: false,
@@ -102,12 +102,12 @@ const Pricing = () => {
                 <div className="max-w-6xl mx-auto">
                     <div className="text-center mb-16">
                         <h1 className="text-4xl sm:text-5xl font-bold mb-4">
-                            {language === 'vi' ? 'Bảng Giá ' : 'Our '}
-                            <span className="gradient-text">{language === 'vi' ? 'Linh Hoạt' : 'Pricing'}</span>
+                            {language === 'vi' ? 'Đầu Tư ' : 'Our '}
+                            <span className="gradient-text">{language === 'vi' ? 'Thông Minh' : 'Pricing'}</span>
                         </h1>
                         <p className="text-xl text-muted-foreground">
                             {language === 'vi'
-                                ? 'Chọn gói phù hợp nhất với nhu cầu của bạn'
+                                ? 'Dù bạn là người mới hay chuyên gia, chúng tôi đều có giải pháp hoàn hảo dành riêng cho bạn.'
                                 : 'Choose the best plan for your needs'}
                         </p>
                     </div>

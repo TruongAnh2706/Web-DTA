@@ -235,8 +235,35 @@ const BlogManager = () => {
 
                 <AIImageGenerator isOpen={isAIImageOpen} onClose={() => setIsAIImageOpen(false)} onInsert={(url) => setContent(prev => prev + `<p><img src="${url}" alt="AI" /></p>`)} />
                 <AIWriterModal isOpen={isAIModalOpen} onClose={() => setIsAIModalOpen(false)} mode={aiMode} initialTopic={aiMode === 'generate' ? title : content} onInsert={(generatedContent) => {
-                    if (aiMode === 'generate') setContent((prev) => prev ? prev + '\n\n' + generatedContent : generatedContent);
-                    else setContent(generatedContent);
+                    if (aiMode === 'generate') {
+                        setContent((prev) => prev ? prev + '\n\n' + generatedContent : generatedContent);
+                        
+                        // Tự động trích xuất ảnh đầu tiên làm ảnh bìa nếu chưa có
+                        if (!coverImage) {
+                            const imgMatch = generatedContent.match(/<img[^>]+src=["']([^"']+)["']/);
+                            if (imgMatch && imgMatch[1]) {
+                                setCoverImage(imgMatch[1]);
+                            }
+                        }
+                        
+                        // Tự động trích xuất H1 làm tiêu đề nếu tiêu đề đang trống
+                        if (!title) {
+                            const h1Match = generatedContent.match(/<h1[^>]*>(.*?)<\/h1>/i);
+                            if (h1Match && h1Match[1]) {
+                                const cleanTitle = h1Match[1].replace(/<[^>]+>/g, '').trim();
+                                setTitle(cleanTitle);
+                                setSlug(generateSlug(cleanTitle));
+                            }
+                        }
+
+                        // Tự động tạo excerpt nếu chưa có
+                        if (!excerpt) {
+                            const plainText = generatedContent.replace(/<[^>]+>/g, '').trim();
+                            setExcerpt(plainText.substring(0, 160) + '...');
+                        }
+                    } else {
+                        setContent(generatedContent);
+                    }
                 }} />
                 <AISettingsModal isOpen={isKeysOpen} onClose={() => setIsKeysOpen(false)} />
             </div>

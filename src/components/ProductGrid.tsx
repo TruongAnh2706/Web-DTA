@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Globe, Monitor, ExternalLink, Download, Loader2, Lock } from 'lucide-react';
+import { Globe, Monitor, ExternalLink, Download, Loader2, Lock, PackageOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useApps, getIconComponent, type AppData } from '@/hooks/useApps';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { translations } from '@/lib/data';
@@ -183,7 +184,6 @@ const ProductCard = ({ app, index, isLocked = false, onLockedClick }: ProductCar
             <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button
                 className="w-full btn-neon rounded-xl text-background font-bold uppercase tracking-wider py-5"
-                onClick={(e) => e.preventDefault()}
               >
                 {app.platform === 'web' ? (
                   <>
@@ -242,11 +242,11 @@ const ProductGrid = () => {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl sm:text-5xl font-bold mb-4">
+          <h2 className="text-5xl sm:text-6xl font-bold mb-6 tracking-tight">
             {t.apps.title.split(' ').slice(0, -1).join(' ')}{' '}
-            <span className="gradient-text">{t.apps.title.split(' ').slice(-1)}</span>
+            <span className="gradient-text tracking-normal">{t.apps.title.split(' ').slice(-1)}</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
+          <p className="text-muted-foreground max-w-3xl mx-auto text-xl leading-relaxed text-balance">
             {t.apps.subtitle}
           </p>
         </motion.div>
@@ -275,10 +275,22 @@ const ProductGrid = () => {
           ))}
         </motion.div>
 
-        {/* Loading State */}
+        {/* Loading State: Skeleton */}
         {isLoading && (
-          <div className="flex justify-center py-12">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-12">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card flex flex-col h-[400px] overflow-hidden">
+                <Skeleton className="w-full h-[200px] rounded-none opacity-20" />
+                <div className="p-6 flex flex-col flex-1 gap-4">
+                  <Skeleton className="w-3/4 h-8 rounded-lg opacity-20" />
+                  <div className="space-y-2">
+                    <Skeleton className="w-full h-4 opacity-20" />
+                    <Skeleton className="w-5/6 h-4 opacity-20" />
+                  </div>
+                  <Skeleton className="w-full h-12 mt-auto rounded-xl opacity-20" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -296,21 +308,37 @@ const ProductGrid = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             <AnimatePresence mode="popLayout">
-              {filteredApps?.map((app, index) => {
-                const requiredLevel = app.required_subscription || 'Free';
-                const canAccess = hasAccess(accountType, requiredLevel);
-                const isLocked = !canAccess && requiredLevel !== 'Free';
+              {filteredApps && filteredApps.length > 0 ? (
+                filteredApps.map((app, index) => {
+                  const requiredLevel = app.required_subscription || 'Free';
+                  const canAccess = hasAccess(accountType, requiredLevel);
+                  const isLocked = !canAccess && requiredLevel !== 'Free';
 
-                return (
-                  <ProductCard
-                    key={app.id}
-                    app={app}
-                    index={index}
-                    isLocked={isLocked}
-                    onLockedClick={() => handleLockedAppClick(requiredLevel)}
-                  />
-                );
-              })}
+                  return (
+                    <ProductCard
+                      key={app.id}
+                      app={app}
+                      index={index}
+                      isLocked={isLocked}
+                      onLockedClick={() => handleLockedAppClick(requiredLevel)}
+                    />
+                  );
+                })
+              ) : (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="col-span-full flex flex-col items-center justify-center py-20 px-4 text-center glass-card rounded-3xl border-dashed border-primary/30 bg-primary/5"
+                >
+                  <div className="w-24 h-24 mb-6 rounded-full bg-primary/10 flex items-center justify-center glow-sm">
+                    <PackageOpen className="w-12 h-12 text-primary opacity-80" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-3 text-foreground">Không tìm thấy ứng dụng</h3>
+                  <p className="text-muted-foreground max-w-md text-lg">
+                    Hiện chưa có ứng dụng nào trong danh mục này. Hãy quay lại sau hoặc thử chọn một danh mục khác.
+                  </p>
+                </motion.div>
+              )}
             </AnimatePresence>
           </motion.div>
         )}
