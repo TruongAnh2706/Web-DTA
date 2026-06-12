@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sun, Moon, Languages, Settings, Wallet, LogOut, User } from 'lucide-react';
@@ -22,6 +22,22 @@ import { NotificationDropdown } from './NotificationDropdown';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 50);
+      const totalScroll = document.documentElement.scrollTop;
+      const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scroll = windowHeight > 0 ? totalScroll / windowHeight : 0;
+      setScrollProgress(scroll);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   const { theme, setTheme } = useTheme();
   const { t, i18n } = useTranslation();
   const language = i18n.language;
@@ -65,13 +81,22 @@ const Header = () => {
 
   return (
     <>
+      {/* Scroll Progress Bar */}
+      <div 
+        className="fixed top-0 left-0 h-[2px] bg-gradient-to-r from-[hsl(var(--neon-cyan))] via-[hsl(var(--neon-blue))] to-[hsl(var(--neon-red))] z-[60] shadow-[0_0_10px_hsl(var(--neon-cyan))] transition-all duration-150 ease-out"
+        style={{ width: `${scrollProgress * 100}%` }}
+      />
       <motion.header
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         className="fixed top-0 left-0 right-0 z-50"
       >
-        <div className="mx-4 mt-4">
-          <div className="glass rounded-2xl px-6 py-4 border-[hsl(var(--neon-cyan)/0.2)]">
+        <div className={`transition-all duration-300 ease-in-out ${scrolled ? 'mx-0 mt-0' : 'mx-4 mt-4'}`}>
+          <div className={`transition-all duration-300 ease-in-out ${
+            scrolled 
+            ? 'bg-background/80 backdrop-blur-xl border-b border-[hsl(var(--neon-cyan)/0.2)] px-4 py-3 sm:px-6' 
+            : 'glass rounded-2xl px-6 py-4 border-[hsl(var(--neon-cyan)/0.2)]'
+          }`}>
             <div className="flex items-center justify-between">
               {/* Logo */}
               <Link
@@ -181,7 +206,7 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="rounded-xl hover:bg-primary/10 hover:text-primary relative"
+                    className="hidden sm:inline-flex rounded-xl hover:bg-primary/10 hover:text-primary relative"
                     onClick={() => setIsWalletOpen(true)}
                   >
                     <Wallet className="w-5 h-5" />
@@ -191,7 +216,7 @@ const Header = () => {
 
                 {/* Admin Link */}
                 {isAdmin && (
-                  <Link to="/admin">
+                  <Link to="/admin" className="hidden sm:inline-flex">
                     <Button variant="ghost" size="icon" className="rounded-xl hover:bg-primary/10 hover:text-primary">
                       <Settings className="w-5 h-5" />
                     </Button>
@@ -199,7 +224,7 @@ const Header = () => {
                 )}
 
                 {/* Language Toggle */}
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden sm:block">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -215,7 +240,7 @@ const Header = () => {
                 </span>
 
                 {/* Theme Toggle */}
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden sm:block">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -269,6 +294,48 @@ const Header = () => {
                         </Link>
                       </motion.div>
                     ))}
+                    
+                    {/* Mobile Only Extra Controls */}
+                    <motion.div
+                      initial={{ x: -20, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: navItems.length * 0.1 }}
+                      className="flex flex-col gap-2 mt-4 pt-4 border-t border-primary/20 sm:hidden"
+                    >
+                      {user && (
+                        <button
+                          onClick={() => { setIsWalletOpen(true); setIsMenuOpen(false); }}
+                          className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-primary/10 transition-colors font-semibold text-sm"
+                        >
+                          <Wallet className="w-5 h-5" />
+                          <span>{language === 'vi' ? 'Ví của tôi' : 'My Wallet'}</span>
+                        </button>
+                      )}
+                      {isAdmin && (
+                        <Link
+                          to="/admin"
+                          className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-primary/10 transition-colors font-semibold text-sm"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <Settings className="w-5 h-5" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
+                      <button
+                        onClick={toggleLanguage}
+                        className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-primary/10 transition-colors font-semibold text-sm"
+                      >
+                        <Languages className="w-5 h-5" />
+                        <span>{language === 'vi' ? 'Switch to English' : 'Đổi sang Tiếng Việt'}</span>
+                      </button>
+                      <button
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        className="flex items-center gap-3 py-3 px-4 rounded-xl hover:bg-primary/10 transition-colors font-semibold text-sm"
+                      >
+                        {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                        <span>{theme === 'dark' ? 'Light Mode' : 'Dark Mode'}</span>
+                      </button>
+                    </motion.div>
                   </div>
                 </motion.nav>
               )}

@@ -43,6 +43,9 @@ const Footer = () => {
               <Heart className="w-3 h-3 text-accent inline mx-1" />
               DTA Studio
             </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Phát triển bởi DTA Studio - Đức Trường AI
+            </p>
           </motion.div>
 
           {/* Social Links */}

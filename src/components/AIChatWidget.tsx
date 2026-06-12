@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Send, Bot, User, Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -62,9 +65,22 @@ export function AIChatWidget() {
 
     try {
       const provider = getPrimaryProvider();
+      
+      // Context Awareness: Cho AI biết người dùng đang ở trang nào
+      let contextMsg = 'Bạn là chuyên viên CSKH tự động của DTA Studio. ';
+      if (window.location.pathname === '/pricing') {
+          contextMsg += 'Khách hàng đang xem Bảng giá. Hãy chủ động giới thiệu về lợi ích của gói DTA Pro hoặc Lifetime nếu họ hỏi.';
+      } else if (window.location.pathname.startsWith('/blog')) {
+          contextMsg += 'Khách hàng đang đọc trang Blog. Khuyến khích họ theo dõi các bài viết hữu ích về tự động hóa.';
+      } else if (window.location.pathname === '/tools') {
+          contextMsg += 'Khách hàng đang xem Web Tools. Có thể giới thiệu các tool SEO hoặc Format Text của chúng ta.';
+      } else {
+          contextMsg += 'Hãy trả lời ngắn gọn, lịch sự, thân thiện. Cố gắng hướng người dùng trải nghiệm sản phẩm AutoDown và AutoShorts.';
+      }
+      contextMsg += ' Hỗ trợ trả về định dạng Markdown (như gạch đầu dòng, in đậm).';
 
       const apiMessages = [
-        { role: 'system', content: 'Bạn là chuyên viên chăm sóc khách hàng tự động của DTA Studio. Hãy trả lời ngắn gọn, lịch sự, thân thiện. Cố gắng hướng người dùng tới việc trải nghiệm sản phẩm AutoDown.' },
+        { role: 'system', content: contextMsg },
         ...messages.map(m => ({ role: m.role === 'bot' ? 'assistant' : 'user', content: m.content })),
         { role: 'user', content: userMessage.content }
       ];
@@ -138,6 +154,13 @@ export function AIChatWidget() {
     }
   };
 
+  const location = useLocation();
+
+  // Ẩn chat widget trên các trang admin và workspace (games)
+  const isHiddenRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/workspace');
+
+  if (isHiddenRoute) return null;
+
   return (
     <>
       {/* Floating Button */}
@@ -208,13 +231,19 @@ export function AIChatWidget() {
                     {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
                   </div>
                   <div
-                    className={`p-3 rounded-2xl text-sm ${
+                    className={`p-3 rounded-2xl text-sm prose prose-sm ${
                       msg.role === 'user'
-                        ? 'bg-primary text-primary-foreground rounded-tr-sm'
-                        : 'bg-muted border border-border/50 text-foreground rounded-tl-sm shadow-sm'
+                        ? 'bg-primary text-primary-foreground rounded-tr-sm prose-p:text-primary-foreground prose-a:text-primary-foreground'
+                        : 'bg-muted border border-border/50 text-foreground rounded-tl-sm shadow-sm prose-p:text-foreground prose-a:text-blue-500'
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === 'bot' ? (
+                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                         {msg.content}
+                       </ReactMarkdown>
+                    ) : (
+                       msg.content
+                    )}
                   </div>
                 </div>
               ))}

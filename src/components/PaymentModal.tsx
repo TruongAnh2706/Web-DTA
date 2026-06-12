@@ -27,7 +27,7 @@ const PaymentModal = ({ isOpen, onClose, tier, onSuccess }: PaymentModalProps) =
 
     const handleConfirmPayment = () => {
         setIsSimulating(true);
-        // Simulate checking transaction
+        // Simulate sending request to admin
         setTimeout(() => {
             setIsSimulating(false);
             setIsSuccess(true);
@@ -35,8 +35,8 @@ const PaymentModal = ({ isOpen, onClose, tier, onSuccess }: PaymentModalProps) =
                 onSuccess();
                 setIsSuccess(false);
                 setShowQR(false);
-            }, 2000);
-        }, 3000);
+            }, 5000); // 5 seconds so they can read the manual check message
+        }, 1500);
     };
 
     const t = {
@@ -50,7 +50,8 @@ const PaymentModal = ({ isOpen, onClose, tier, onSuccess }: PaymentModalProps) =
             content: 'Nội dung:',
             confirming: 'Đang kiểm tra giao dịch...',
             confirmBtn: 'Tôi đã chuyển khoản',
-            success: 'Thanh toán thành công!',
+            success: 'Đã gửi yêu cầu xác nhận!',
+            manualCheck: 'Giao dịch sẽ được Admin kiểm tra thủ công trong 5-10 phút.',
             back: 'Quay lại',
             forTier: 'Gói:',
         },
@@ -64,7 +65,8 @@ const PaymentModal = ({ isOpen, onClose, tier, onSuccess }: PaymentModalProps) =
             content: 'Message:',
             confirming: 'Checking transaction...',
             confirmBtn: 'I have paid',
-            success: 'Payment successful!',
+            success: 'Request sent successfully!',
+            manualCheck: 'The transaction will be manually verified by Admin in 5-10 minutes.',
             back: 'Back',
             forTier: 'Plan:',
         },
@@ -100,6 +102,7 @@ const PaymentModal = ({ isOpen, onClose, tier, onSuccess }: PaymentModalProps) =
                                         <CheckCircle2 className="w-10 h-10 text-green-500" />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-2">{texts.success}</h3>
+                                    <p className="text-muted-foreground text-sm mt-2">{texts.manualCheck}</p>
                                 </motion.div>
                             ) : (
                                 <>

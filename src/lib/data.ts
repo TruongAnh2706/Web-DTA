@@ -44,7 +44,7 @@ export const translations = {
       },
     },
     footer: {
-      copyright: '© 2025 Made with',
+      copyright: '© 2026 Made with',
       tagline: 'Crafting Digital Excellence',
     },
     badges: {
@@ -75,13 +75,13 @@ export const translations = {
     hero: {
       badge: 'Trung Tâm Đổi Mới',
       title: {
-        line1: 'Xây Dựng.',
-        line2: 'Tự Động. Đổi Mới.',
+        line1: 'Kiến Tạo.',
+        line2: 'Tự Động Hóa. Bứt Phá.',
       },
-      subtitle: 'DTA Studio tạo ra các công cụ và ứng dụng mạnh mẽ giúp tối ưu quy trình làm việc và tăng năng suất của bạn.',
+      subtitle: 'Biến những quy trình phức tạp thành thao tác một click. DTA Studio cung cấp hệ sinh thái công cụ tự động hóa thông minh, giúp bạn tiết kiệm thời gian và nhân chuẩn hiệu suất làm việc.',
       cta: {
-        explore: 'Khám Phá',
-        learn: 'Tìm Hiểu',
+        explore: 'Khám Phá Ngay',
+        learn: 'Tìm Hiểu Thêm',
       },
     },
     categories: {
@@ -91,14 +91,14 @@ export const translations = {
       automation: 'Công Cụ Tự Động',
     },
     apps: {
-      title: 'Bộ Sưu Tập Phần Mềm',
-      subtitle: 'Khám phá bộ công cụ được thiết kế tỉ mỉ để nâng cao trải nghiệm số của bạn.',
+      title: 'Hệ Sinh Thái DTA',
+      subtitle: 'Khám phá bộ giải pháp công nghệ được chăm chút tỉ mỉ từ giao diện đến cốt lõi, sẵn sàng đồng hành cùng bạn chinh phục mọi thử thách.',
       launch: 'Khởi Chạy',
       download: 'Tải Xuống',
     },
     about: {
       title: 'Về DTA Studio',
-      description: 'Chúng tôi là một đội ngũ đam mê tận tâm tạo ra các giải pháp phần mềm sáng tạo.',
+      description: 'Bắt nguồn từ sự thấu hiểu những khó khăn trong các thao tác lặp đi lặp lại mỗi ngày, DTA Studio không ngừng nỗ lực tạo ra các phần mềm tự động hóa đơn giản, tinh gọn mang lại hiệu quả vượt trội. Chúng tôi không chỉ viết code, chúng tôi tối ưu hóa cuộc sống số của bạn.',
       features: {
         feature1: 'AI Mạnh Mẽ',
         feature2: 'Nhanh & Ổn Định',
@@ -107,7 +107,7 @@ export const translations = {
       },
     },
     footer: {
-      copyright: '© 2025 Made with',
+      copyright: '© 2026 Made with',
       tagline: 'Kiến Tạo Sự Xuất Sắc Số',
     },
     badges: {

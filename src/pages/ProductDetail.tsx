@@ -133,9 +133,9 @@ const ProductDetail = () => {
   ];
 
   const stats = [
-    { icon: Star, value: '4.9', label: language === 'vi' ? 'Đánh giá' : 'Rating' },
-    { icon: Download, value: '50K+', label: language === 'vi' ? 'Lượt tải' : 'Downloads' },
-    { icon: Zap, value: '99.9%', label: language === 'vi' ? 'Uptime' : 'Uptime' },
+    { icon: Star, value: app.stats?.rating || '4.9', label: language === 'vi' ? 'Đánh giá' : 'Rating' },
+    { icon: Download, value: app.stats?.downloads || '1K+', label: language === 'vi' ? 'Lượt tải' : 'Downloads' },
+    { icon: Zap, value: app.stats?.uptime || '99.9%', label: language === 'vi' ? 'Uptime' : 'Uptime' },
   ];
 
   const imageUrl = app.image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=450&fit=crop&auto=format';

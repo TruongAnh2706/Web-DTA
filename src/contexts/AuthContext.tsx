@@ -13,7 +13,6 @@ export interface AuthState {
     accountType: AccountType;
     subscriptionLevel: SubscriptionLevel;
     signIn: (email: string, password: string) => Promise<{ data: any; error: any }>;
-    signUp: (email: string, password: string) => Promise<{ data: any; error: any }>;
     signOut: () => Promise<{ error: any }>;
     signInWithGoogle: () => Promise<{ data: any; error: any }>;
     resetPassword: (email: string) => Promise<{ data: any; error: any }>;
@@ -91,6 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         let mounted = true;
+        let initialSessionHandled = false;
 
         // Safety timeout to prevent infinite loading
         const safetyTimeout = setTimeout(() => {
@@ -104,6 +104,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
             async (_event, session) => {
                 if (!mounted) return;
+                // Bỏ qua event đầu tiên (INITIAL_SESSION) vì getSession đã xử lý
+                if (!initialSessionHandled) return;
 
                 const user = session?.user ?? null;
                 const { isAdmin, accountType, subscriptionLevel, isBlocked } = await processUserAuth(user);
@@ -148,6 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     accountType: 'Free',
                     subscriptionLevel: 'None',
                 });
+                initialSessionHandled = true;
                 return;
             }
 
@@ -159,9 +162,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 accountType,
                 subscriptionLevel,
             });
+            // Sau khi xử lý xong initial session, cho phép onAuthStateChange hoạt động
+            initialSessionHandled = true;
         }).catch(err => {
             clearTimeout(safetyTimeout);
             console.error('Get Session Error:', err);
+            initialSessionHandled = true;
             if (mounted) {
                 setAuthState(prev => ({ ...prev, loading: false }));
             }
@@ -188,17 +194,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return { data, error };
     };
 
-    const signUp = async (email: string, password: string) => {
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                emailRedirectTo: window.location.origin,
-            },
-        });
-        return { data, error };
-    };
-
     const signOut = async () => {
         const { error } = await supabase.auth.signOut();
         return { error };
@@ -222,13 +217,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const resetPassword = async (email: string) => {
         const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-            redirectTo: `${window.location.origin}/reset-password`,
+            redirectTo: `${window.location.origin}/auth`,
         });
         return { data, error };
     };
 
     return (
-        <AuthContext.Provider value={{ ...authState, signIn, signUp, signOut, signInWithGoogle, resetPassword }}>
+        <AuthContext.Provider value={{ ...authState, signIn, signOut, signInWithGoogle, resetPassword }}>
             {children}
         </AuthContext.Provider>
     );

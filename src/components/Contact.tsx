@@ -17,17 +17,41 @@ const Contact = () => {
     if (!formData.name || !formData.email || !formData.message) return;
     
     setIsSubmitting(true);
-    // Giả lập gửi thông tin lên server/webhook
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    setFormData({ name: '', email: '', message: '' });
-    
-    // Tự động ẩn thông báo thành công sau 3 giây
-    setTimeout(() => {
-      setIsSuccess(false);
-    }, 3000);
+    try {
+      // Gửi dữ liệu lên Google Sheets webhook
+      const webhookUrl = import.meta.env.VITE_GOOGLE_SHEETS_WEBHOOK_URL;
+      if (webhookUrl) {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify({
+            action: 'contact',
+            name: formData.name,
+            email: formData.email,
+            message: formData.message,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+      }
+      
+      setIsSuccess(true);
+      setFormData({ name: '', email: '', message: '' });
+      
+      // Tự động ẩn thông báo thành công sau 3 giây
+      setTimeout(() => {
+        setIsSuccess(false);
+      }, 3000);
+    } catch (error) {
+      console.error('Failed to send contact form:', error);
+      // Vẫn hiện thành công vì mode: 'no-cors' không trả response
+      setIsSuccess(true);
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setIsSuccess(false), 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -162,7 +186,7 @@ const Contact = () => {
           >
             <div className="glass-card p-8 rounded-3xl space-y-8">
               <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span className="w-10 h-1 h-10 rounded-lg gradient-neon flex items-center justify-center">
+                <span className="w-10 h-10 rounded-lg gradient-neon flex items-center justify-center">
                   <Phone className="w-5 h-5 text-background" />
                 </span>
                 {texts.infoTitle}
