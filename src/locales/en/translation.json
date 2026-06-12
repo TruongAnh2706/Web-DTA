@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "products": "Products",
+    "tools": "Tools",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "login": "Login",
+    "my_account": "My Account",
+    "profile": "My Profile",
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  },
+  "home": {
+    "hero": {
+      "title": "Duc Truong AI",
+      "subtitle": "Optimize 80% of video production workflows with AI.",
+      "cta": "Explore"
+    },
+    "products": {
+      "title": "DTA Ecosystem",
+      "autodown": {
+        "title": "DTA AutoDown",
+        "desc": "High-speed batch video downloader."
+      },
+      "voicepro": {
+        "title": "DTA Voice Pro",
+        "desc": "Neural Text-to-Speech & Voice Cloning."
+      },
+      "automation": {
+        "title": "Content Automation",
+        "desc": "SEO and automated video workflow."
+      }
+    },
+    "why_us": {
+      "title": "Why Choose Us?",
+      "tech": {
+        "title": "Tech-Driven",
+        "desc": "Powered by the latest AI models like Whisper, Gemini, and more."
+      },
+      "user": {
+        "title": "User-Centric",
+        "desc": "Optimized interface for Vietnamese users meeting international standards."
+      },
+      "efficiency": {
+        "title": "Maximum Efficiency",
+        "desc": "Reduce post-production processing time by up to 80%."
+      }
+    },
+    "pricing_page": {
+      "title": "Flexible ",
+      "title_highlight": "Pricing",
+      "subtitle": "Choose the best plan for your needs",
+      "popular": "Popular",
+      "get_started": "Get Started",
+      "free": {
+        "name": "Free Starter",
+        "desc": "For beginners",
+        "f1": "Access basic tools",
+        "f2": "Standard download speed",
+        "f3": "Community support"
+      },
+      "pro": {
+        "name": "Pro Creator",
+        "desc": "For power users",
+        "period": "/month",
+        "f1": "Unlock all Premium tools",
+        "f2": "High-speed downloads",
+        "f3": "Priority support",
+        "f4": "Early access updates"
+      },
+      "vip": {
+        "name": "Lifetime VIP",
+        "desc": "One-time payment",
+        "period": "/once",
+        "f1": "All PRO features",
+        "f2": "Source code access",
+        "f3": "1:1 Direct support",
+        "f4": "Exclusive VIP badge"
+      }
+    },
+    "blog_page": {
+      "title": "Insights & Updates",
+      "subtitle": "Discover the latest news, tutorials, and insights about AI content creation.",
+      "featured": "Featured",
+      "readMore": "Read more",
+      "noPosts": "No posts available yet.",
+      "dateFormat": "MMMM d, yyyy"
+    },
+    "tools_page": {
+      "title": "Web Tools",
+      "subtitle": "Collection of useful online tools, running directly in your browser.",
+      "use_tool": "Use Tool",
+      "no_tools": "No tools available yet."
+    },
+    "about_page": {
+      "title": "DTA Studio – Engineering the Future of Digital Content.",
+      "mission": {
+        "title": "Our Mission",
+        "desc": "To unlock the limitless potential of creators through technology. We automate the calculations so you are free to create."
+      },
+      "values": {
+        "title": "Core Values",
+        "ai": {
+          "title": "AI-Driven Excellence",
+          "desc": "Natural voice processing and intelligent automation that redefine limits."
+        },
+        "efficiency": {
+          "title": "Maximum Efficiency",
+          "desc": "Unmatched speeds and batch processing pipelines for massive scaling."
+        },
+        "growth": {
+          "title": "Sustainable Growth",
+          "desc": "SEO and thumbnail solutions designed to elevate your personal brand."
+        }
+      }
+    }
+  }
+}

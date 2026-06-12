@@ -1,0 +1,120 @@
+{
+  "nav": {
+    "home": "Trang chủ",
+    "about": "Về chúng tôi",
+    "products": "Sản phẩm",
+    "tools": "Công cụ",
+    "pricing": "Bảng giá",
+    "blog": "Tin tức",
+    "login": "Đăng Nhập",
+    "my_account": "Tài khoản của tôi",
+    "profile": "Hồ sơ cá nhân",
+    "dashboard": "Bảng điều khiển",
+    "logout": "Đăng xuất"
+  },
+  "home": {
+    "hero": {
+      "title": "Đức Trường AI",
+      "subtitle": "Tối ưu hóa 80% quy trình sản xuất video bằng công nghệ AI.",
+      "cta": "Khám Phá"
+    },
+    "products": {
+      "title": "Hệ Sinh Thái DTA",
+      "autodown": {
+        "title": "DTA AutoDown",
+        "desc": "Tải video hàng loạt đa nền tảng tốc độ cao."
+      },
+      "voicepro": {
+        "title": "DTA Voice Pro",
+        "desc": "AI lồng tiếng, clone giọng nói đa ngôn ngữ."
+      },
+      "automation": {
+        "title": "Content Automation",
+        "desc": "Tự động hóa quản trị và tối ưu SEO video."
+      }
+    },
+    "why_us": {
+      "title": "Tại sao chọn DTA Studio?",
+      "tech": {
+        "title": "Công Nghệ Đột Phá",
+        "desc": "Sử dụng các model AI mới nhất (Whisper, Gemini, v.v.)."
+      },
+      "user": {
+        "title": "Trải Nghiệm Hoàn Hảo",
+        "desc": "Giao diện tối ưu cho người Việt nhưng đạt tiêu chuẩn quốc tế."
+      },
+      "efficiency": {
+        "title": "Hiệu Suất Tối Đa",
+        "desc": "Giảm 80% thời gian xử lý hậu kỳ của bạn."
+      }
+    },
+    "pricing_page": {
+      "title": "Bảng Giá ",
+      "title_highlight": "Linh Hoạt",
+      "subtitle": "Chọn gói phù hợp nhất với nhu cầu của bạn",
+      "popular": "Phổ biến",
+      "get_started": "Bắt Đầu Ngay",
+      "free": {
+        "name": "Miễn Phí",
+        "desc": "Cho người mới bắt đầu",
+        "f1": "Truy cập các tool cơ bản",
+        "f2": "Tốc độ tải xuống tiêu chuẩn",
+        "f3": "Hỗ trợ cộng đồng"
+      },
+      "pro": {
+        "name": "Chuyên Nghiệp",
+        "desc": "Cho người dùng chuyên sâu",
+        "period": "/tháng",
+        "f1": "Mở khóa tất cả Premium tools",
+        "f2": "Tốc độ tải xuống cực nhanh",
+        "f3": "Hỗ trợ ưu tiên",
+        "f4": "Cập nhật sớm nhất"
+      },
+      "vip": {
+        "name": "V.I.P Trọn Đời",
+        "desc": "Thanh toán một lần duy nhất",
+        "period": "/lần",
+        "f1": "Tất cả tính năng PRO",
+        "f2": "Quyền truy cập mã nguồn",
+        "f3": "Hỗ trợ trực tiếp 1:1",
+        "f4": "Huy hiệu VIP độc quyền"
+      }
+    },
+    "blog_page": {
+      "title": "Tin Tức & Cập Nhật",
+      "subtitle": "Khám phá những tin tức, hướng dẫn và thông tin mới nhất về sáng tạo nội dung AI.",
+      "featured": "Nổi Bật",
+      "readMore": "Đọc tiếp",
+      "noPosts": "Chưa có bài viết nào.",
+      "dateFormat": "dd/MM/yyyy"
+    },
+    "tools_page": {
+      "title": "Công Cụ Trực Tuyến",
+      "subtitle": "Bộ sưu tập các công cụ trực tuyến tiện ích, chạy ngay trên trình duyệt của bạn.",
+      "use_tool": "Sử dụng ngay",
+      "no_tools": "Chưa có công cụ nào."
+    },
+    "about_page": {
+      "title": "DTA Studio – Hệ sinh thái công nghệ dẫn đầu xu hướng sáng tạo.",
+      "mission": {
+        "title": "Sứ Mệnh",
+        "desc": "Đánh thức tiềm năng vô hạn của nhà sáng tạo nội dung bằng sức mạnh công nghệ. Chúng tôi tự động hóa sự toan tính để bạn tự do sáng tạo."
+      },
+      "values": {
+        "title": "Giá Trị Cốt Lõi",
+        "ai": {
+          "title": "Tối Ưu AI",
+          "desc": "Xử lý giọng nói tự nhiên và tự động hóa thông minh giúp bứt phá giới hạn."
+        },
+        "efficiency": {
+          "title": "Hiệu Suất Tối Đa",
+          "desc": "Tốc độ vượt trội của AutoDown và quy trình xử lý hàng loạt."
+        },
+        "growth": {
+          "title": "Tăng Trưởng Bền Vững",
+          "desc": "Giải pháp SEO và hình ảnh giúp nâng tầm thương hiệu cá nhân."
+        }
+      }
+    }
+  }
+}

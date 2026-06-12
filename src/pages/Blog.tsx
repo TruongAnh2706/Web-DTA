@@ -1,20 +1,18 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import AnimatedBackground from '@/components/AnimatedBackground';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, ArrowRight } from 'lucide-react';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { BlogPost } from '@/hooks/useBlog';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import { Helmet } from 'react-helmet';
 
 const BlogPage = () => {
-    const { t, language } = useLanguage();
+    const { t, i18n } = useTranslation();
+    const language = i18n.language;
 
     const { data: posts, isLoading } = useQuery({
         queryKey: ['public-blog-posts'],
@@ -34,18 +32,20 @@ const BlogPage = () => {
     const otherPosts = posts?.filter(p => p.id !== featuredPost?.id);
 
     return (
-        <div className="min-h-screen relative flex flex-col">
-            <AnimatedBackground />
-            <Header />
+        <>
+            <Helmet>
+                <title>{t('nav.blog')} - DTA Studio</title>
+                <meta name="description" content={t('home.blog_page.subtitle')} />
+            </Helmet>
 
-            <main className="flex-1 container mx-auto px-4 pt-24 pb-12 relative z-10">
-                <div className="text-center mb-16 space-y-4 mt-8">
+            <main className="flex-1 container mx-auto px-4 pt-32 pb-24 relative z-10">
+                <div className="text-center mb-16 space-y-4">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         className="text-4xl md:text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60"
                     >
-                        {t.blog.title}
+                        {t('home.blog_page.title')}
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -53,14 +53,14 @@ const BlogPage = () => {
                         transition={{ delay: 0.2 }}
                         className="text-xl text-muted-foreground max-w-2xl mx-auto"
                     >
-                        {t.blog.subtitle}
+                        {t('home.blog_page.subtitle')}
                     </motion.p>
                 </div>
 
                 {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="h-96 glass-card rounded-2xl animate-pulse" />
+                            <div key={i} className="h-96 glass-card rounded-3xl animate-pulse" />
                         ))}
                     </div>
                 ) : (
@@ -70,7 +70,7 @@ const BlogPage = () => {
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="glass-card rounded-3xl overflow-hidden grid md:grid-cols-2 gap-8 p-6 md:p-8 hover:bg-white/5 transition-colors group"
+                                className="glass-card neon-border rounded-3xl overflow-hidden grid md:grid-cols-2 gap-8 p-6 md:p-8 hover:bg-white/5 transition-colors group"
                             >
                                 <div className="rounded-2xl overflow-hidden aspect-video md:aspect-auto border border-white/10 relative">
                                     <img
@@ -79,7 +79,7 @@ const BlogPage = () => {
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                     <div className="absolute top-4 left-4">
-                                        <Badge className="bg-primary text-primary-foreground hover:bg-primary/90">{t.blog.featured}</Badge>
+                                        <Badge className="bg-primary text-primary-foreground hover:bg-primary/90">{t('home.blog_page.featured')}</Badge>
                                     </div>
                                 </div>
                                 <div className="flex flex-col justify-center space-y-6">
@@ -87,7 +87,7 @@ const BlogPage = () => {
                                         <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                             <span className="flex items-center gap-1">
                                                 <Calendar className="w-4 h-4" />
-                                                {format(new Date(featuredPost.created_at), t.blog.dateFormat, { locale: language === 'vi' ? vi : undefined })}
+                                                {format(new Date(featuredPost.created_at), t('home.blog_page.dateFormat'), { locale: language === 'vi' ? vi : undefined })}
                                             </span>
                                             {featuredPost.tags && featuredPost.tags.length > 0 && (
                                                 <>
@@ -107,7 +107,7 @@ const BlogPage = () => {
                                     </p>
                                     <Link to={`/blog/${featuredPost.slug}`}>
                                         <Badge variant="outline" className="pl-4 pr-2 py-2 text-sm rounded-full group-hover:border-primary/50 transition-colors">
-                                            {t.blog.readMore} <ArrowRight className="w-4 h-4 ml-2" />
+                                            {t('home.blog_page.readMore')} <ArrowRight className="w-4 h-4 ml-2" />
                                         </Badge>
                                     </Link>
                                 </div>
@@ -122,7 +122,7 @@ const BlogPage = () => {
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.1 * idx }}
-                                    className="glass-card rounded-2xl overflow-hidden flex flex-col group hover:-translate-y-1 transition-all duration-300"
+                                    className="glass-card neon-border rounded-3xl overflow-hidden flex flex-col group hover:-translate-y-2 transition-all duration-500"
                                 >
                                     <Link to={`/blog/${post.slug}`} className="block relative aspect-video overflow-hidden">
                                         <img
@@ -135,7 +135,7 @@ const BlogPage = () => {
                                     <div className="p-6 flex-1 flex flex-col space-y-4">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span>
-                                                {format(new Date(post.created_at), t.blog.dateFormat, { locale: language === 'vi' ? vi : undefined })}
+                                                {format(new Date(post.created_at), t('home.blog_page.dateFormat'), { locale: language === 'vi' ? vi : undefined })}
                                             </span>
                                             {post.tags?.slice(0, 2).map(tag => (
                                                 <Badge key={tag} variant="secondary" className="text-[10px] h-5">{tag}</Badge>
@@ -146,7 +146,7 @@ const BlogPage = () => {
                                                 {post.title}
                                             </h3>
                                         </Link>
-                                        <p className="text-sm text-muted-foreground line-clamp-3 flex-1">
+                                        <p className="text-sm text-muted-foreground line-clamp-3 flex-1 leading-relaxed">
                                             {post.excerpt}
                                         </p>
                                     </div>
@@ -155,16 +155,14 @@ const BlogPage = () => {
                         </div>
 
                         {posts?.length === 0 && (
-                            <div className="text-center py-20 text-muted-foreground">
-                                <p>{t.blog.noPosts}</p>
+                            <div className="text-center py-20 text-muted-foreground text-lg">
+                                <p>{t('home.blog_page.noPosts')}</p>
                             </div>
                         )}
                     </div>
                 )}
             </main>
-
-            <Footer />
-        </div>
+        </>
     );
 };
 

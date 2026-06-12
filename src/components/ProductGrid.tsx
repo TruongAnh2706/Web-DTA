@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Globe, Monitor, ExternalLink, Download, Loader2, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -39,31 +39,42 @@ interface ProductCardProps {
 
 const ProductCard = ({ app, index, isLocked = false, onLockedClick }: ProductCardProps) => {
   const { language, t } = useLanguage();
-  const [rotateX, setRotateX] = useState(0);
-  const [rotateY, setRotateY] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+  
+  // Tọa độ 3D Tilt Motion
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  
+  // Spring nghiêng 3D quán tính nhẹ nhàng (Tilt 8 độ tối giản)
+  const springConfig = { damping: 20, stiffness: 120 };
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), springConfig);
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), springConfig);
 
   const Icon = getIconComponent(app.icon_name);
   const title = language === 'vi' ? app.title_vi : app.title;
   const description = language === 'vi' ? app.description_vi : app.description;
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-
-    const rotateXValue = ((y - centerY) / centerY) * -15;
-    const rotateYValue = ((x - centerX) / centerX) * 15;
-
-    setRotateX(rotateXValue);
-    setRotateY(rotateYValue);
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    
+    // Tọa độ chuột chuẩn hóa từ -0.5 đến 0.5
+    const relativeX = (e.clientX - rect.left) / width - 0.5;
+    const relativeY = (e.clientY - rect.top) / height - 0.5;
+    
+    x.set(relativeX);
+    y.set(relativeY);
+    
+    // Cập nhật vị trí chuột cho CSS Radial Gradient mờ dịu
+    cardRef.current.style.setProperty('--x', `${e.clientX - rect.left}px`);
+    cardRef.current.style.setProperty('--y', `${e.clientY - rect.top}px`);
   };
 
   const handleMouseLeave = () => {
-    setRotateX(0);
-    setRotateY(0);
+    x.set(0);
+    y.set(0);
   };
 
   const imageUrl = app.image_url || 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=600&h=340&fit=crop&auto=format';
@@ -88,16 +99,24 @@ const ProductCard = ({ app, index, isLocked = false, onLockedClick }: ProductCar
     >
       <Link to={isLocked ? '#' : `/app/${app.id}`} className={isLocked ? 'cursor-pointer' : ''}>
         <motion.div
+          ref={cardRef}
           onMouseMove={handleMouseMove}
           onMouseLeave={handleMouseLeave}
           style={{
             rotateX,
             rotateY,
             transformStyle: 'preserve-3d',
+            willChange: 'transform'
           }}
-          transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          className="glass-card neon-border p-0 h-full flex flex-col overflow-hidden transform-gpu cursor-pointer"
+          className="glass-card neon-border p-0 h-full flex flex-col overflow-hidden transform-gpu cursor-pointer relative"
         >
+          {/* Radial glow di chuyển theo chuột siêu dịu mắt (opacity 8%) */}
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none rounded-3xl"
+            style={{
+              background: `radial-gradient(350px circle at var(--x, 0px) var(--y, 0px), rgba(0, 240, 255, 0.08), transparent 50%)`
+            }}
+          />
           {/* Image Container */}
           <div
             className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-secondary/50 to-muted/50"

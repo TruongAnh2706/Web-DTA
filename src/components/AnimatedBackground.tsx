@@ -19,6 +19,27 @@ const AnimatedBackground = () => {
     let animationFrameId: number;
     let particles: Particle[] = [];
     let lastTime = 0;
+
+    const mouse = {
+      x: 0,
+      y: 0,
+      targetX: 0,
+      targetY: 0,
+      active: false
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+      mouse.active = true;
+    };
+
+    const handleMouseLeave = () => {
+      mouse.active = false;
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
     const fps = 60;
     const interval = 1000 / fps;
     let isVisible = true;
@@ -71,14 +92,28 @@ const AnimatedBackground = () => {
         this.speedX = (Math.random() - 0.5) * baseSpeed * 2;
         this.speedY = (Math.random() - 0.5) * baseSpeed * 2;
 
-        // Tăng opacity tối thiếu lên 0.3 (trước là 0.15) để rõ hơn trên nền sáng
-        this.opacity = 0.3 + this.depth * 0.5;
+        // Tăng opacity tối thiếu lên 0.65 để các hạt sáng rực rỡ
+        this.opacity = 0.65 + this.depth * 0.35;
 
         // Use colors from CSS variables
         this.color = Math.random() > 0.5 ? themeColors.cyan : themeColors.red;
       }
 
       update() {
+        // Hút hạt nhẹ về phía con trỏ chuột
+        if (mouse.active) {
+          const dx = mouse.x - this.x;
+          const dy = mouse.y - this.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          const influenceRadius = 180;
+          if (dist < influenceRadius) {
+            const force = (1 - dist / influenceRadius) * 0.8; // Lực hút nhẹ nhàng vừa phải
+            const angle = Math.atan2(dy, dx);
+            this.x += Math.cos(angle) * force;
+            this.y += Math.sin(angle) * force;
+          }
+        }
+
         this.x += this.speedX;
         this.y += this.speedY;
 
@@ -125,9 +160,9 @@ const AnimatedBackground = () => {
 
           if (distance < maxDistance) {
             ctx.beginPath();
-            // Use cyan color for connections, with dynamic alpha
-            ctx.strokeStyle = `hsl(${themeColors.cyan} / ${0.15 * (1 - distance / maxDistance)})`;
-            ctx.lineWidth = 0.5;
+            // Use cyan color for connections (tăng lên 0.6 và dày 1.2px)
+            ctx.strokeStyle = `hsl(${themeColors.cyan} / ${0.6 * (1 - distance / maxDistance)})`;
+            ctx.lineWidth = 1.2;
             ctx.moveTo(particles[i].x, particles[i].y);
             ctx.lineTo(particles[j].x, particles[j].y);
             ctx.stroke();
@@ -146,12 +181,45 @@ const AnimatedBackground = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Lerp tọa độ chuột để di chuyển mượt mà
+      if (mouse.active) {
+        mouse.x += (mouse.targetX - mouse.x) * 0.08;
+        mouse.y += (mouse.targetY - mouse.y) * 0.08;
+
+        // Vẽ thêm quầng sáng mờ lan tỏa bám theo con trỏ chuột trên background (sáng 15%, bán kính 160px)
+        const gradient = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 160);
+        gradient.addColorStop(0, `hsl(${themeColors.cyan} / 0.15)`);
+        gradient.addColorStop(1, `hsl(${themeColors.cyan} / 0)`);
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 140, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
       particles.forEach(particle => {
         particle.update();
         particle.draw();
       });
 
       connectParticles();
+
+      // Kết nối con trỏ chuột với các hạt gần đó
+      if (mouse.active) {
+        const maxMouseDist = 160;
+        for (let i = 0; i < particles.length; i++) {
+          const dx = particles[i].x - mouse.x;
+          const dy = particles[i].y - mouse.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < maxMouseDist) {
+            ctx.beginPath();
+            ctx.strokeStyle = `hsl(${themeColors.cyan} / ${0.75 * (1 - distance / maxMouseDist)})`;
+            ctx.lineWidth = 1.5;
+            ctx.moveTo(mouse.x, mouse.y);
+            ctx.lineTo(particles[i].x, particles[i].y);
+            ctx.stroke();
+          }
+        }
+      }
     };
 
     // Initialize
@@ -168,6 +236,8 @@ const AnimatedBackground = () => {
 
     return () => {
       window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
       cancelAnimationFrame(animationFrameId);
       if (containerRef.current) {
         observer.unobserve(containerRef.current);

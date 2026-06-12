@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=Orbitron:wght@700;800;900&family=Montserrat:wght@800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -49,45 +49,45 @@
   }
 
   .dark {
-    --background: 220 30% 4%;
+    --background: 224 38% 7%; /* #0B0F19 */
     --foreground: 210 20% 95%;
-    --card: 220 30% 7%;
+    --card: 220 38% 3.5%; /* #05070B */
     --card-foreground: 210 20% 95%;
-    --popover: 220 30% 7%;
+    --popover: 220 38% 3.5%;
     --popover-foreground: 210 20% 95%;
-    --primary: 185 100% 50%;
-    --primary-foreground: 220 30% 4%;
+    --primary: 180 100% 50%; /* #00FFFF / Neon Blue */
+    --primary-foreground: 224 38% 7%;
     --secondary: 220 25% 12%;
     --secondary-foreground: 210 15% 90%;
     --muted: 220 25% 12%;
     --muted-foreground: 210 15% 55%;
-    --accent: 355 100% 55%;
+    --accent: 340 100% 50%; /* #FF0055 / Neon Red */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 25% 15%;
     --input: 220 25% 15%;
-    --ring: 185 100% 50%;
+    --ring: 180 100% 50%;
 
     /* Custom tokens - Neon Theme Dark */
-    --neon-cyan: 185 100% 55%;
-    --neon-red: 355 100% 60%;
+    --neon-cyan: 180 100% 50%; /* #00FFFF */
+    --neon-red: 340 100% 50%; /* #FF0055 */
     --neon-blue: 210 100% 60%;
-    --gradient-start: 185 100% 55%;
-    --gradient-end: 355 100% 60%;
-    --glass-bg: 220 30% 8% / 0.75;
-    --glass-border: 185 100% 50% / 0.15;
-    --glow-cyan: 185 100% 55%;
-    --glow-red: 355 100% 60%;
+    --gradient-start: 180 100% 50%;
+    --gradient-end: 340 100% 50%;
+    --glass-bg: 224 38% 7% / 0.65; /* Cyber-Glassmorphism mờ đục 65% */
+    --glass-border: 180 100% 50% / 0.08; /* Viền siêu mỏng */
+    --glow-cyan: 180 100% 50%;
+    --glow-red: 340 100% 50%;
 
-    --sidebar-background: 220 30% 6%;
+    --sidebar-background: 224 38% 5%;
     --sidebar-foreground: 210 20% 95%;
-    --sidebar-primary: 185 100% 50%;
-    --sidebar-primary-foreground: 220 30% 4%;
+    --sidebar-primary: 180 100% 50%;
+    --sidebar-primary-foreground: 224 38% 7%;
     --sidebar-accent: 220 25% 12%;
     --sidebar-accent-foreground: 210 20% 95%;
     --sidebar-border: 220 25% 15%;
-    --sidebar-ring: 185 100% 50%;
+    --sidebar-ring: 180 100% 50%;
   }
 }
 
@@ -99,6 +99,15 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Be Vietnam Pro', sans-serif;
+  }
+
+  @media (pointer: fine) {
+    body {
+      cursor: none !important;
+    }
+    a, button, [role="button"], input, select, textarea, iframe {
+      cursor: none !important;
+    }
   }
 
   h1,
@@ -384,3 +393,208 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary/70;
 }
+
+/* Infinite Marquee Animation */
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-infinite {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll var(--marquee-speed, 25s) linear infinite;
+  animation-direction: var(--marquee-dir, normal);
+  white-space: nowrap;
+}
+
+/* Shimmer Text & Animations */
+@keyframes shimmer-sweep {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--neon-cyan)) 0%,
+    hsl(var(--neon-blue)) 25%,
+    #ffffff 50%,
+    hsl(var(--neon-blue)) 75%,
+    hsl(var(--neon-red)) 100%
+  );
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-sweep 12s linear infinite;
+  text-shadow: 0 0 40px hsl(var(--neon-cyan) / 0.15);
+}
+
+/* Cyber Glass Card & Border Glow */
+.cyber-glass {
+  background: rgba(11, 15, 25, 0.65) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+}
+
+.led-border-glow {
+  position: relative;
+}
+
+.led-border-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(90deg, hsl(var(--neon-cyan)), hsl(var(--neon-red)));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.3;
+  transition: opacity 0.5s ease, padding 0.3s ease;
+  pointer-events: none;
+}
+
+.led-border-glow:hover::after {
+  opacity: 1;
+  padding: 1.5px;
+  box-shadow: 0 0 15px hsl(var(--neon-cyan) / 0.3);
+}
+
+/* Floating Animation */
+@keyframes cyber-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+}
+
+.animate-cyber-float {
+  animation: cyber-float 6s ease-in-out infinite;
+}
+
+/* Cyber Grid Background */
+.cyber-grid-bg {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center center;
+}
+
+/* TV Scanlines Effect */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanlines::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+  z-index: 2;
+  background-size: 100% 4px;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* Shine Sweep Effect */
+.shine-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: none;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.shine-sweep:hover::before {
+  left: 150%;
+  transition: left 0.8s ease-in-out;
+}
+
+/* HUD elements helper */
+.hud-line {
+  height: 1px;
+  background: linear-gradient(90deg, hsl(var(--neon-cyan) / 0.5), transparent);
+}
+
+.hud-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  background-color: hsl(var(--neon-cyan));
+  box-shadow: 0 0 8px hsl(var(--neon-cyan));
+}
+
+/* 3D Cute Jelly Custom Cursor */
+.jelly-blob-cursor {
+  border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  background: linear-gradient(135deg, hsl(var(--neon-cyan)), hsl(var(--neon-red)));
+  box-shadow: 
+    0 0 15px hsl(var(--neon-cyan) / 0.4),
+    0 0 30px hsl(var(--neon-red) / 0.2),
+    inset -3px -3px 8px rgba(0, 0, 0, 0.45),
+    inset 3px 3px 8px rgba(255, 255, 255, 0.6);
+  animation: jelly-morph 6s ease-in-out infinite;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
+}
+
+.jelly-blob-hover {
+  border-radius: 50% !important;
+  background: rgba(11, 15, 25, 0.4) !important;
+  border: 1px solid hsl(var(--neon-cyan) / 0.6) !important;
+  box-shadow: 
+    0 0 15px hsl(var(--neon-cyan) / 0.4),
+    0 0 30px hsl(var(--neon-red) / 0.1),
+    inset 0 0 8px hsl(var(--neon-cyan) / 0.3);
+  backdrop-filter: blur(2px);
+}
+
+@keyframes jelly-morph {
+  0%, 100% {
+    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+  }
+  33% {
+    border-radius: 45% 55% 50% 50% / 40% 60% 40% 60%;
+  }
+  66% {
+    border-radius: 55% 45% 65% 35% / 60% 40% 60% 40%;
+  }
+}
+

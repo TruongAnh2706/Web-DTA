@@ -9,6 +9,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { AIChatWidget } from "@/components/AIChatWidget";
+import { CustomCursor } from "@/components/CustomCursor";
 import "./pages/games/styles/index.css";
 
 // Lazy load pages for better performance
@@ -25,6 +26,9 @@ const BlogPost = lazy(() => import("./pages/BlogPost"));
 const Profile = lazy(() => import("./pages/Profile"));
 const Changelog = lazy(() => import("./pages/Changelog"));
 const FAQ = lazy(() => import("./pages/FAQ"));
+const About = lazy(() => import("./pages/About"));
+const Products = lazy(() => import("./pages/Products"));
+import RootLayout from "./components/layout/RootLayout";
 
 // DTA Stealth Games
 const WorkspaceHub = lazy(() => import("./pages/games/WorkspaceHub"));
@@ -54,7 +58,7 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} forcedTheme="dark">
       <LanguageProvider>
         <AuthProvider>
           <TooltipProvider>
@@ -63,30 +67,33 @@ const App = () => (
             <BrowserRouter>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/app/:id" element={<ProductDetail />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/pricing" element={<Pricing />} />
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/admin" element={<Admin />} />
-                  <Route path="/tools" element={<WebTools />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/changelog" element={<Changelog />} />
-                  <Route path="/faq" element={<FAQ />} />
+                  <Route element={<RootLayout />}>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/products" element={<Products />} />
+                    <Route path="/app/:id" element={<ProductDetail />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/pricing" element={<Pricing />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/admin" element={<Admin />} />
+                    <Route path="/tools" element={<WebTools />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/changelog" element={<Changelog />} />
+                    <Route path="/faq" element={<FAQ />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
 
-                  {/* DTA Stealth Games */}
+                  {/* DTA Stealth Games (Outside Layout) */}
                   <Route path="/workspace" element={<WorkspaceHub />} />
                   <Route path="/workspace/diagnostic" element={<BattleshipGame />} />
                   <Route path="/workspace/sheets" element={<CaroGame />} />
                   <Route path="/workspace/docs" element={<WordChainGame />} />
                   <Route path="/workspace/decrypt" element={<HangmanGame />} />
-
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
                 </Routes>
                 <AIChatWidget />
+                <CustomCursor />
               </Suspense>
             </BrowserRouter>
           </TooltipProvider>

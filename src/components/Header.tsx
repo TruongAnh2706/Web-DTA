@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '@/hooks/useAuth';
 import { useDashboard } from '@/hooks/useDashboard';
 import WalletModal from './WalletModal';
@@ -23,7 +23,8 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWalletOpen, setIsWalletOpen] = useState(false);
   const { theme, setTheme } = useTheme();
-  const { language, setLanguage, t } = useLanguage();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
   const { user, isAdmin, signOut } = useAuth();
   const { data: dashboardData } = useDashboard();
   const navigate = useNavigate();
@@ -34,17 +35,17 @@ const Header = () => {
   };
 
   const navItems = [
-    { label: t.nav.home, href: '/' },
-    { label: t.nav.apps, href: '/#apps' }, // We'll handle this click to ensure scrolling
-    { label: 'Web Tools', href: '/tools' },
-    { label: 'Blog', href: '/blog' },
-    { label: language === 'vi' ? 'Bảng Giá' : 'Pricing', href: '/pricing' },
-    { label: t.nav.about, href: '/#about' },
-    { label: t.nav.contact, href: '/#contact' },
+    { label: t('nav.home'), href: '/' },
+    { label: t('nav.products'), href: '/products' },
+    { label: t('nav.tools'), href: '/tools' },
+    { label: t('nav.blog'), href: '/blog' },
+    { label: t('nav.pricing'), href: '/pricing' },
+    { label: t('nav.about'), href: '/about' },
   ];
 
   const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'vi' : 'en');
+    i18n.changeLanguage(language === 'en' ? 'vi' : 'en');
+    localStorage.setItem('dta_language', language === 'en' ? 'vi' : 'en');
   };
 
   // Handle smooth scroll for hash links
@@ -58,10 +59,7 @@ const Header = () => {
           element.scrollIntoView({ behavior: 'smooth' });
         }
       }
-      // If we are NOT on home page, Link will navigate to /, then we need to scroll. 
-      // This usually requires a separate wrapper or useEffect on Index page.
     }
-
     setIsMenuOpen(false);
   };
 
@@ -125,7 +123,7 @@ const Header = () => {
                 {!user ? (
                   <Link to="/auth">
                     <Button className="btn-neon rounded-xl text-background font-bold tracking-wider">
-                      {language === 'vi' ? 'Đăng Nhập' : 'Login'}
+                      {t('nav.login')}
                     </Button>
                   </Link>
                 ) : null}
@@ -148,19 +146,19 @@ const Header = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56 mt-2">
                       <DropdownMenuLabel>
-                        {language === 'vi' ? 'Tài khoản của tôi' : 'My Account'}
+                        {t('nav.my_account')}
                       </DropdownMenuLabel>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link to="/profile" className="flex items-center gap-2 cursor-pointer">
                           <User className="w-4 h-4" />
-                          <span>{language === 'vi' ? 'Hồ sơ cá nhân' : 'My Profile'}</span>
+                          <span>{t('nav.profile')}</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link to="/dashboard" className="flex items-center gap-2 cursor-pointer">
                           <Settings className="w-4 h-4" />
-                          <span>{language === 'vi' ? 'Dashboard' : 'Dashboard'}</span>
+                          <span>{t('nav.dashboard')}</span>
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
@@ -169,7 +167,7 @@ const Header = () => {
                         className="flex items-center gap-2 cursor-pointer text-red-500 focus:text-red-600"
                       >
                         <LogOut className="w-4 h-4" />
-                        <span>{language === 'vi' ? 'Đăng xuất' : 'Logout'}</span>
+                        <span>{t('nav.logout')}</span>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

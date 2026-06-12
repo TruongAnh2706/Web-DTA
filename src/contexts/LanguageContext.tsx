@@ -1,32 +1,29 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
-import { translations, Language } from '@/lib/data';
+import React, { createContext, useContext, ReactNode, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { translations } from '@/lib/data';
+
+type Language = 'vi' | 'en';
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: typeof translations.en;
+  t: typeof translations.en; // Legacy object
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-// Đọc ngôn ngữ đã lưu từ localStorage, mặc định là 'vi' (Tiếng Việt)
-const getInitialLanguage = (): Language => {
-  try {
-    const saved = localStorage.getItem('dta_language');
-    if (saved === 'en' || saved === 'vi') return saved;
-  } catch { /* ignore */ }
-  return 'vi';
-};
-
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguageState] = useState<Language>(getInitialLanguage);
+  const { i18n } = useTranslation();
+
+  const language = (i18n.language || 'vi') as Language;
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
+    i18n.changeLanguage(lang);
     try { localStorage.setItem('dta_language', lang); } catch { /* ignore */ }
-  }, []);
+  }, [i18n]);
 
-  const t = translations[language];
+  // Fallback object for components not yet rewritten
+  const t = translations[language] || translations.vi;
 
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>

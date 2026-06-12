@@ -1,80 +1,37 @@
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Code, Heart, Zap, Shield, Globe, Users } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
-import { supabase } from '@/integrations/supabase/client';
+import { Cpu, Layout, Zap, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const About = () => {
-  const { language } = useLanguage();
-  const [stats, setStats] = useState({ users: '10k+', apps: '50+' });
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // @ts-expect-error missing type in generated schema
-        const { data, error } = await supabase.rpc('get_public_stats');
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setStats({
-            users: data[0].total_users.toString(),
-            apps: data[0].total_apps.toString()
-          });
-        }
-      } catch (err) {
-        console.error('Failed to fetch public stats:', err);
-      }
-    };
-    fetchStats();
-  }, []);
-
-  const t = {
-    vi: {
-      title: 'Về DTA Studio',
-      subtitle: 'Chúng tôi xây dựng các giải pháp tự động hóa giúp bạn làm việc hiệu quả hơn.',
-      mission: 'Sứ Mệnh',
-      missionDesc: 'Đánh thức tiềm năng vô hạn của nhà sáng tạo nội dung bằng sức mạnh công nghệ. Chúng tôi tự động hóa sự toan tính để bạn tự do sáng tạo.',
-      vision: 'Tầm Nhìn',
-      visionDesc: 'Trở thành "Vũ khí bí mật" không thể thiếu của mọi MMO-er và Content Creator hàng đầu tại Việt Nam.',
-      values: 'Giá Trị Cốt Lõi',
-      statsLabel: {
-        users: 'Người dùng',
-        apps: 'Dự án',
-        revenue: 'Khách hàng hài lòng',
-      }
-    },
-    en: {
-      title: 'About DTA Studio',
-      subtitle: 'We build automation solutions that help you work smarter.',
-      mission: 'Mission',
-      missionDesc: 'To unlock the limitless potential of creators through technology. We automate the calculations so you are free to create.',
-      vision: 'Vision',
-      visionDesc: 'To become the indispensable "Secret Weapon" for every top MMO-er and Content Creator in Vietnam.',
-      values: 'Core Values',
-      statsLabel: {
-        users: 'Active Users',
-        apps: 'Projects',
-        revenue: 'Happy Clients',
-      }
-    },
-  };
-
-  const texts = t[language as keyof typeof t] || t.en;
+  const { t } = useTranslation();
 
   const features = [
     {
-      icon: Code,
-      title: language === 'vi' ? 'Công Nghệ Hiện Đại' : 'Modern Tech',
-      desc: language === 'vi' ? 'Sử dụng React, Node.js, AI mới nhất.' : 'Using latest React, Node.js, AI stack.'
+      id: 'tech',
+      icon: Cpu,
+      title: t('home.why_us.tech.title'),
+      desc: t('home.why_us.tech.desc'),
+      color: 'text-neon-cyan',
+      bgGlow: 'bg-[hsl(var(--neon-cyan))]',
+      delay: 0
     },
     {
-      icon: Shield,
-      title: language === 'vi' ? 'An Toàn & Bảo Mật' : 'Secure & Safe',
-      desc: language === 'vi' ? 'Bảo vệ dữ liệu người dùng tuyệt đối.' : 'Absolute user data protection.'
+      id: 'user',
+      icon: Layout,
+      title: t('home.why_us.user.title'),
+      desc: t('home.why_us.user.desc'),
+      color: 'text-neon-red',
+      bgGlow: 'bg-[hsl(var(--neon-red))]',
+      delay: 0.2
     },
     {
+      id: 'efficiency',
       icon: Zap,
-      title: language === 'vi' ? 'Hiệu Suất Cao' : 'High Performance',
-      desc: language === 'vi' ? 'Tối ưu hóa tốc độ và trải nghiệm.' : 'Optimized for speed and experience.'
+      title: t('home.why_us.efficiency.title'),
+      desc: t('home.why_us.efficiency.desc'),
+      color: 'text-neon-cyan',
+      bgGlow: 'bg-[hsl(var(--neon-cyan))]',
+      delay: 0.4
     }
   ];
 
@@ -85,83 +42,52 @@ const About = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            <span className="gradient-text">{texts.title}</span>
+          <h2 className="text-4xl md:text-5xl font-black mb-6 flex items-center justify-center gap-3">
+            <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+            <span className="gradient-text">{t('home.why_us.title')}</span>
+            <Sparkles className="w-8 h-8 text-primary animate-pulse" />
           </h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            {texts.subtitle}
-          </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="glass-card p-8 rounded-3xl space-y-6 neon-border"
-          >
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-primary/20 rounded-xl text-primary">
-                <Heart className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">{texts.mission}</h3>
-                <p className="text-muted-foreground">{texts.missionDesc}</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="p-3 bg-accent/20 rounded-xl text-accent">
-                <Globe className="w-8 h-8" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold mb-2">{texts.vision}</h3>
-                <p className="text-muted-foreground">{texts.visionDesc}</p>
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            className="grid grid-cols-2 gap-6"
-          >
-            <div className="glass-card p-6 rounded-2xl text-center">
-              <div className="text-4xl font-bold gradient-text mb-2">{stats.users}</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.users}</div>
-            </div>
-            <div className="glass-card p-6 rounded-2xl text-center">
-              <div className="text-4xl font-bold gradient-text mb-2">{stats.apps}</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.apps}</div>
-            </div>
-            <div className="glass-card p-6 rounded-2xl text-center col-span-2">
-              <div className="text-4xl font-bold gradient-text mb-2">99.9%</div>
-              <div className="text-sm text-muted-foreground uppercase tracking-wider">{texts.statsLabel.revenue}</div>
-            </div>
-          </motion.div>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {features.map((feature, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              className="glass-card p-6 rounded-2xl text-center hover:bg-primary/5 transition-colors"
-            >
-              <div className="w-16 h-16 mx-auto mb-6 rounded-full gradient-neon flex items-center justify-center">
-                <feature.icon className="w-8 h-8 text-background" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-              <p className="text-muted-foreground">{feature.desc}</p>
-            </motion.div>
-          ))}
+        <div className="grid md:grid-cols-3 gap-8 relative">
+          {features.map((feature, idx) => {
+            return (
+              <motion.div
+                key={feature.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-100px" }}
+                transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1], delay: feature.delay }}
+                className="relative z-10"
+              >
+                <div className="cyber-glass p-8 rounded-3xl h-full border border-white/5 transform hover:-translate-y-2 transition-all duration-500">
+                  {/* Background Glow */}
+                  <div className={`absolute -top-10 -right-10 w-32 h-32 ${feature.bgGlow} opacity-[0.03] rounded-full blur-3xl`} />
+                  
+                  <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transform transition-transform duration-500 hover:rotate-6">
+                    <feature.icon className="w-8 h-8 text-white/80" />
+                  </div>
+                  
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold mb-3 text-white">
+                      {feature.title}
+                    </h3>
+                    <p className="text-muted-foreground leading-relaxed text-xs">
+                      {feature.desc}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
+      
+      {/* Parallax Background Elements */}
+      <div className="absolute top-1/2 right-0 w-96 h-96 bg-[hsl(var(--neon-cyan))] rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-[hsl(var(--neon-red))] rounded-full mix-blend-screen filter blur-[150px] opacity-10 pointer-events-none -translate-x-1/2 translate-y-1/4" />
     </section>
   );
 };
