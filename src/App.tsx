@@ -28,6 +28,7 @@ const Changelog = lazy(() => import("./pages/Changelog"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const About = lazy(() => import("./pages/About"));
 const Products = lazy(() => import("./pages/Products"));
+const Resources = lazy(() => import("./pages/Resources"));
 import RootLayout from "./components/layout/RootLayout";
 
 // DTA Stealth Games
@@ -71,6 +72,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/products" element={<Products />} />
+                    <Route path="/resources" element={<Resources />} />
                     <Route path="/app/:id" element={<ProductDetail />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/pricing" element={<Pricing />} />

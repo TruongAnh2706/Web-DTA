@@ -103,7 +103,7 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                     <div className="text-center space-y-4">
                                         <div className="w-48 h-48 mx-auto bg-white p-2 rounded-xl">
                                             <img
-                                                src={`https://img.vietqr.io/image/vib-995992999-compact.png?amount=${amount}&addInfo=NAP ${amount}&accountName=Pham Duc Truong`}
+                                                src={`https://img.vietqr.io/image/vib-995992999-compact.png?amount=${amount}&addInfo=NAP ${shortId}&accountName=Pham Duc Truong`}
                                                 alt="VietQR"
                                                 className="w-full h-full object-contain"
                                             />
@@ -112,7 +112,7 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                             <p className="font-bold text-primary">Ngân hàng Quốc tế VIB</p>
                                             <p>STK: <span className="font-mono">995992999</span></p>
                                             <p>Chủ TK: Phạm Đức Trường</p>
-                                            <p className="text-xs text-muted-foreground mt-2">Nội dung: <span className="font-mono font-bold text-accent">NAP {(parseInt(amount) || 0)}</span></p>
+                                            <p className="text-xs text-muted-foreground mt-2">Nội dung: <span className="font-mono font-bold text-accent">NAP {shortId}</span></p>
                                         </div>
                                         <Button variant="outline" onClick={() => setShowQR(false)} className="w-full">
                                             Quay lại / Cancel
