@@ -77,8 +77,8 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    // Đọc từ file database tĩnh api/products_db.json (Dùng __dirname để Vercel tự động đóng gói)
-    const dbPath = path.join(__dirname, 'products_db.json');
+    // Đọc từ file database tĩnh api/products_db.json (Dùng process.cwd() để tương thích ESM trên Vercel)
+    const dbPath = path.join(process.cwd(), 'api', 'products_db.json');
     if (!fs.existsSync(dbPath)) {
       return res.status(404).json({ 
         status: 'error', 
