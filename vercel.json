@@ -1,4 +1,9 @@
 {
+    "functions": {
+        "api/products.ts": {
+            "includeFiles": "api/products_db.json"
+        }
+    },
     "rewrites": [
         {
             "source": "/(.*)",
