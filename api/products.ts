@@ -30,7 +30,8 @@ export default async function handler(req: any, res: any) {
       if (!response.ok) {
         return res.status(response.status).json({ 
           status: 'error', 
-          msg: `ShopMini API returned status ${response.status}` 
+          msg: `ShopMini API returned status ${response.status}`,
+          debug_key: apiKey ? `${apiKey.slice(0, 4)}...${apiKey.slice(-4)} (len: ${apiKey.length})` : 'undefined'
         });
       }
       
