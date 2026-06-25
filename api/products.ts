@@ -17,15 +17,14 @@ export default async function handler(req: any, res: any) {
     return res.status(405).json({ status: 'error', msg: 'Phương thức không được hỗ trợ' });
   }
 
-  const apiKey = process.env.SHOPMINI_API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ status: 'error', msg: 'Chưa cấu hình API Key trên Server' });
-  }
-
   const { id } = req.query;
 
   // TRƯỜNG HỢP 1: Lấy chi tiết variants của 1 sản phẩm chính (Real-time)
   if (id) {
+    const apiKey = process.env.SHOPMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ status: 'error', msg: 'Chưa cấu hình API Key trên Server' });
+    }
     try {
       const response = await fetch(`https://shopmini.net/api/products.php?api_key=${apiKey}&id=${id}`);
       if (!response.ok) {
