@@ -329,9 +329,46 @@ export default function Resources() {
     }
   };
 
-  // Xác nhận giao dịch mua hàng (Chuyển hướng sang link giới thiệu ShopMini)
+  // Xác nhận giao dịch mua hàng
   const handleConfirmBuy = () => {
-    window.open('https://shopmini.net/ref/SMzuch83XR', '_blank');
+    if (!user) {
+      toast({
+        title: 'Yêu cầu đăng nhập',
+        description: 'Vui lòng đăng nhập tài khoản để thực hiện mua tài nguyên.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!selectedVariant) return;
+    
+    const min = parseInt(selectedVariant.min, 10) || 1;
+    const max = parseInt(selectedVariant.max, 10) || 100000;
+    const available = selectedVariant.amount;
+
+    if (buyAmount < min || buyAmount > max || buyAmount > available) {
+      toast({
+        title: 'Số lượng không hợp lệ',
+        description: 'Vui lòng kiểm tra lại giới hạn mua của phân loại này.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Kiểm tra số dư tài khoản ví Web-DTA
+    const totalCost = getSubtotal();
+    if (userBalance < totalCost) {
+      setBuyError('Số dư ví của bạn không đủ để thực hiện giao dịch này.');
+      toast({
+        title: 'Số dư không đủ',
+        description: 'Vui lòng nạp thêm tiền vào ví để tiếp tục.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setBuyError(null);
+    buyMutation.mutate({ id: selectedVariant.id, amount: buyAmount });
   };
 
   // Copy nhanh thông tin
@@ -1157,17 +1194,41 @@ export default function Resources() {
                   )}
 
                   {/* Chi tiết số dư và thanh toán (Đã thiết lập w-full, flex-row alignment chống tràn) */}
-                  {/* Thông tin đối tác phân phối */}
-                  <div className="mt-3 p-3.5 bg-[#070913]/60 border border-primary/10 rounded-xl space-y-1.5 w-full text-center">
-                    <p className="text-[11px] text-muted-foreground leading-relaxed font-semibold">
-                      Sản phẩm được phân phối và bảo hành chính hãng bởi đối tác ShopMini.
-                    </p>
-                    <div className="flex justify-between items-center w-full pt-1.5 border-t border-primary/5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Đơn giá ước tính:</span>
-                      <span className="text-sm font-black font-mono text-[hsl(var(--neon-cyan))]">
+                  <div className="mt-3 p-3.5 bg-[#070913]/60 border border-primary/10 rounded-xl space-y-2 w-full">
+                    <div className="flex justify-between items-center text-xs text-muted-foreground w-full">
+                      <span className="shrink-0 font-medium">Số dư ví DTA hiện có:</span>
+                      <span className="font-bold text-[hsl(var(--neon-cyan))] font-mono text-right shrink-0">
+                        {!user ? "0 VNĐ" : formatVND(userBalance)}
+                      </span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center w-full pt-1 border-t border-primary/5">
+                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground shrink-0">Tổng thanh toán:</span>
+                      <span className="text-base font-black font-mono text-[hsl(var(--neon-cyan))] text-right shrink-0">
                         {formatVND(getSubtotal())}
                       </span>
                     </div>
+
+                    {/* Warning số dư */}
+                    {userBalance < getSubtotal() && (
+                      <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-2 w-full">
+                        <p className="text-[11px] text-[hsl(var(--neon-red))] font-semibold flex items-center gap-1.5 whitespace-normal break-words">
+                          <AlertCircle className="w-4 h-4 shrink-0" />
+                          Số dư ví của bạn không đủ để thanh toán!
+                        </p>
+                        <Button 
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setIsDetailOpen(false);
+                            setIsWalletOpen(true);
+                          }}
+                          className="border-[hsl(var(--neon-red))/30] hover:bg-red-500/20 text-[hsl(var(--neon-red))] font-bold text-[10px] uppercase h-8 rounded-lg w-full"
+                        >
+                          Nạp thêm tiền ví
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -1189,12 +1250,21 @@ export default function Resources() {
               Hủy bỏ
             </Button>
             <Button
-              disabled={!selectedVariant || buyAmount <= 0}
+              disabled={!selectedVariant || !!buyError || buyMutation.isPending || buyAmount <= 0 || userBalance < getSubtotal()}
               onClick={handleConfirmBuy}
               className="flex-1 btn-neon text-background font-black tracking-wider rounded-xl h-11 relative overflow-hidden shadow-[0_0_10px_rgba(0,255,255,0.2)]"
             >
-              <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
-              MUA NGAY (SHOPMINI)
+              {buyMutation.isPending ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin text-background" />
+                  Đang mua...
+                </>
+              ) : (
+                <>
+                  <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
+                  MUA NGAY
+                </>
+              )}
             </Button>
           </div>
         </DialogContent>
