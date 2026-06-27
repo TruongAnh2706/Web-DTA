@@ -778,7 +778,7 @@ export default function Resources() {
                 <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">Sắp xếp theo</label>
                 <div className="space-y-2 text-xs font-semibold">
                   {[
-                    { id: 'default', label: 'Mặc định' },
+                    { id: 'default', label: 'Mặc định (ShopMini)' },
                     { id: 'sales', label: 'Bán chạy nhất (Hot)' },
                     { id: 'price_asc', label: 'Giá thấp đến cao' },
                     { id: 'price_desc', label: 'Giá cao xuống thấp' },
@@ -1077,7 +1077,7 @@ export default function Resources() {
                 {isDetailLoading ? (
                   <div className="py-8 text-center space-y-2">
                     <RefreshCw className="w-5 h-5 mx-auto text-primary animate-spin" />
-                    <p className="text-xs text-muted-foreground font-mono">Đang tải phân loại tài nguyên...</p>
+                    <p className="text-xs text-muted-foreground font-mono">Đang tải phân loại từ ShopMini...</p>
                   </div>
                 ) : detailData?.status === 'success' && detailData.product?.variants && detailData.product.variants.length > 0 ? (
                   <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1 scrollbar-thin w-full">

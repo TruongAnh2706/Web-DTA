@@ -20,26 +20,6 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
 
     const shortId = user?.id ? user.id.split('-')[0].toUpperCase() : '0000';
 
-    // Trích xuất và làm sạch tên từ metadata hoặc email (không dấu, không ký tự đặc biệt)
-    const getCleanName = () => {
-        if (!user) return 'USER';
-        let name = user.user_metadata?.username || user.user_metadata?.full_name || '';
-        if (!name && user.email) {
-            name = user.email.split('@')[0];
-        }
-        return name
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "")
-            .replace(/đ/g, "d")
-            .replace(/Đ/g, "D")
-            .replace(/[^a-zA-Z0-9]/g, "")
-            .toUpperCase()
-            .slice(0, 10); // Giới hạn 10 ký tự cho gọn nội dung chuyển khoản
-    };
-
-    const cleanName = getCleanName();
-    const memo = `NAP ${cleanName} ${shortId}`;
-
     const t = {
         vi: {
             title: 'Ví Của Bạn',
@@ -123,7 +103,7 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                     <div className="text-center space-y-4">
                                         <div className="w-48 h-48 mx-auto bg-white p-2 rounded-xl">
                                             <img
-                                                src={`https://img.vietqr.io/image/vib-995992999-compact.png?amount=${amount}&addInfo=${memo}&accountName=Pham Duc Truong`}
+                                                src={`https://img.vietqr.io/image/vib-995992999-compact.png?amount=${amount}&addInfo=NAP ${shortId}&accountName=Pham Duc Truong`}
                                                 alt="VietQR"
                                                 className="w-full h-full object-contain"
                                             />
@@ -132,7 +112,7 @@ const WalletModal = ({ isOpen, onClose, balance }: WalletModalProps) => {
                                             <p className="font-bold text-primary">Ngân hàng Quốc tế VIB</p>
                                             <p>STK: <span className="font-mono">995992999</span></p>
                                             <p>Chủ TK: Phạm Đức Trường</p>
-                                            <p className="text-xs text-muted-foreground mt-2">Nội dung: <span className="font-mono font-bold text-accent">{memo}</span></p>
+                                            <p className="text-xs text-muted-foreground mt-2">Nội dung: <span className="font-mono font-bold text-accent">NAP {shortId}</span></p>
                                         </div>
                                         <Button variant="outline" onClick={() => setShowQR(false)} className="w-full">
                                             Quay lại / Cancel
