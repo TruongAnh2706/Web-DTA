@@ -1023,7 +1023,7 @@ export default function Resources() {
 
       </div>
 
-      {/* DIALOG CHI TIẾT SẢN PHẨM & CÁC PHÂN LOẠI (VARIANTS) REAL-TIME (TỐI ƯU HÓA HIỂN THỊ ẢNH TO, TRÁNH TRÀN LỀ) */}
+                              {/* DIALOG CHI TIẾT SẢN PHẨM & CÁC PHÂN LOẠI (VARIANTS) REAL-TIME (TỐI ƯU HÓA HIỂN THỊ ẢNH TO, TRÁNH TRÀN LỀ) */}
       <Dialog open={isDetailOpen} onOpenChange={(open) => {
         setIsDetailOpen(open);
         if (!open) {
@@ -1033,7 +1033,7 @@ export default function Resources() {
           setBuyError(null);
         }
       }}>
-        <DialogContent className="max-w-xl glass border-[hsl(var(--neon-cyan)/0.3)] bg-[#070913]/95 text-foreground rounded-3xl p-6 shadow-[0_0_25px_rgba(0,255,255,0.08)]">
+        <DialogContent className="max-w-4xl md:max-w-5xl glass border-[hsl(var(--neon-cyan)/0.3)] bg-[#070913]/95 text-foreground rounded-3xl p-6 shadow-[0_0_25px_rgba(0,255,255,0.08)] scrollbar-thin overflow-y-auto max-h-[90vh]">
           <DialogHeader className="border-b border-primary/10 pb-3">
             <DialogTitle className="text-lg font-black text-[hsl(var(--neon-cyan))] flex items-center gap-2 uppercase tracking-wide">
               <ShoppingCart className="w-5 h-5 text-primary" />
@@ -1045,193 +1045,241 @@ export default function Resources() {
           </DialogHeader>
 
           {selectedProduct && (
-            <div className="space-y-4 py-2 w-full min-w-0">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 py-2 w-full min-w-0 text-left">
               
-              {/* Box thông tin sản phẩm chính (Nâng cấp: Ảnh lớn w-20 h-20, fix lỗi tiêu đề dài) */}
-              <div className="p-3.5 bg-primary/5 border border-primary/10 rounded-2xl flex gap-4 items-center w-full min-w-0">
-                <div className="w-20 h-20 md:w-24 md:h-24 relative overflow-hidden rounded-xl border-2 border-[#FFC107] shrink-0 bg-[#070913] p-1.5 shadow-[0_0_8px_rgba(255,193,7,0.1)]">
+              {/* CỘT TRÁI (4/12): Ảnh lớn sản phẩm chính, Badge trang trí, Số lượng, Ví tiền, Thanh toán */}
+              <div className="md:col-span-4 flex flex-col gap-4 w-full min-w-0">
+                <div className="w-full aspect-square max-w-[240px] md:max-w-none relative overflow-hidden rounded-2xl border-2 border-[#FFC107] bg-[#070913] p-3 shadow-[0_0_15px_rgba(255,193,7,0.1)] flex items-center justify-center shrink-0 mx-auto md:mx-0">
                   <img 
                     src={selectedProduct.image} 
                     alt={selectedProduct.name}
                     className="w-full h-full object-contain"
                   />
-                </div>
-                <div className="space-y-1 flex-1 min-w-0 text-left">
-                  <h4 className="font-bold text-foreground text-sm md:text-base leading-snug break-words whitespace-normal">
-                    {selectedProduct.name}
-                  </h4>
-                  <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground font-mono pt-1">
-                    <span>Mã SP: <strong className="text-foreground">{selectedProduct.id}</strong></span>
-                    <span>•</span>
-                    <span>Tồn kho: <strong className="text-foreground">{selectedProduct.stock}</strong></span>
+                  {/* Overlay che logo SM của ShopMini bằng Logo DTA chính thức (To hơn, che phủ 100%) */}
+                  <div className="absolute bottom-0 left-0 bg-[#070913]/95 w-16 h-12 rounded-tr-2xl border-t border-r border-[hsl(var(--neon-cyan))/0.3] flex items-center justify-center p-2 shadow-[4px_-4px_12px_rgba(0,0,0,0.6)] select-none pointer-events-none z-10">
+                    <img 
+                      src="/logo.png" 
+                      alt="DTA Studio Logo" 
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
-              </div>
 
-              {/* Tải danh sách variants */}
-              <div className="space-y-2 w-full">
-                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono block">
-                  Chọn phân loại (Variants)
-                </label>
-
-                {isDetailLoading ? (
-                  <div className="py-8 text-center space-y-2">
-                    <RefreshCw className="w-5 h-5 mx-auto text-primary animate-spin" />
-                    <p className="text-xs text-muted-foreground font-mono">Đang tải phân loại từ ShopMini...</p>
+                {/* Badge trang trí */}
+                <div className="w-full space-y-2 text-center md:text-left shrink-0">
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    <span className="bg-green-500/10 text-green-500 text-[10px] font-black px-2 py-1 rounded-xl border border-green-500/20 uppercase tracking-wider font-mono flex items-center gap-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                      Đã xác thực
+                    </span>
+                    <span className="bg-[hsl(var(--neon-cyan))]/10 text-[hsl(var(--neon-cyan))] text-[10px] font-black px-2 py-1 rounded-xl border border-[hsl(var(--neon-cyan))]/20 uppercase tracking-wider font-mono">
+                      Chính hãng DTA
+                    </span>
                   </div>
-                ) : detailData?.status === 'success' && detailData.product?.variants && detailData.product.variants.length > 0 ? (
-                  <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1 scrollbar-thin w-full">
-                    {detailData.product.variants.map((variant) => {
-                      const isSelected = selectedVariant?.id === variant.id;
-                      const isOutOfStock = variant.amount <= 0;
+                  <p className="text-[10px] text-muted-foreground leading-relaxed italic">
+                    * Tài nguyên chất lượng cao, bảo hành 1 đổi 1 nhanh chóng.
+                  </p>
+                </div>
 
-                      return (
-                        <div
-                          key={variant.id}
+                {/* Phần số lượng, ví tiền, mua hàng (Đưa từ cột phải sang cột trái) */}
+                {selectedVariant && (
+                  <div className="space-y-4 pt-3 border-t border-primary/5 w-full shrink-0">
+                    {/* Tăng giảm số lượng */}
+                    <div className="space-y-2 w-full">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                        <span>Số lượng mua:</span>
+                        <span className="font-mono text-[9px] font-medium lowercase text-muted-foreground/60">
+                          (Giới hạn: {selectedVariant.min} - {selectedVariant.max})
+                        </span>
+                      </div>
+                      
+                      <div className="flex items-center gap-2 w-full">
+                        <Button
+                          type="button"
+                          variant="outline"
                           onClick={() => {
-                            if (isOutOfStock) return;
-                            setSelectedVariant(variant);
-                            setBuyAmount(parseInt(variant.min, 10) || 1);
-                            setBuyError(null);
+                            const newAmount = Math.max(parseInt(selectedVariant.min, 10) || 1, buyAmount - 1);
+                            setBuyAmount(newAmount);
+                            handleAmountChange(newAmount.toString(), selectedVariant);
                           }}
-                          className={`p-3 rounded-xl border text-xs cursor-pointer transition-all flex items-center justify-between gap-3 ${
-                            isOutOfStock 
-                            ? 'bg-[#070913]/30 border-primary/5 opacity-50 cursor-not-allowed'
-                            : isSelected
-                            ? 'bg-[hsl(var(--neon-cyan))/0.05] border-[hsl(var(--neon-cyan))] text-foreground shadow-[0_0_10px_rgba(0,255,255,0.02)]'
-                            : 'bg-background/40 border-primary/10 text-muted-foreground hover:text-foreground hover:border-primary/30'
-                          }`}
+                          className="h-8 w-8 rounded-lg border-primary/20 hover:bg-primary/5 font-bold shrink-0 p-0"
                         >
-                          <div className="flex items-center gap-2.5 min-w-0">
-                            <input
-                              type="radio"
-                              name="variant-select"
-                              checked={isSelected}
-                              disabled={isOutOfStock}
-                              onChange={() => {}}
-                              className="accent-[hsl(var(--neon-cyan))] shrink-0"
-                            />
-                            <div className="min-w-0">
-                              <p className="font-bold truncate whitespace-normal break-words">{variant.name}</p>
-                              <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
-                                Tồn kho: <strong className="text-foreground">{variant.amount}</strong> • Giá: <strong className="text-foreground">{formatVND(variant.price)}</strong>
-                              </p>
-                            </div>
-                          </div>
+                          <Minus className="w-3 h-3" />
+                        </Button>
+                        
+                        <Input
+                          type="number"
+                          min={selectedVariant.min}
+                          max={selectedVariant.max}
+                          value={buyAmount === 0 ? '' : buyAmount}
+                          onChange={(e) => handleAmountChange(e.target.value, selectedVariant)}
+                          className="flex-1 rounded-lg border-primary/20 bg-[#070913]/50 focus-visible:ring-[hsl(var(--neon-cyan))] font-mono font-bold text-center text-xs h-8 text-foreground"
+                        />
 
-                          <div className="text-right shrink-0">
-                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider uppercase font-mono ${
-                              isOutOfStock 
-                              ? 'bg-red-500/10 text-red-500'
-                              : 'bg-green-500/10 text-green-500'
-                            }`}>
-                              {isOutOfStock ? 'Hết hàng' : 'Sẵn sàng'}
-                            </span>
-                          </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            const newAmount = Math.min(selectedVariant.amount, buyAmount + 1);
+                            setBuyAmount(newAmount);
+                            handleAmountChange(newAmount.toString(), selectedVariant);
+                          }}
+                          className="h-8 w-8 rounded-lg border-primary/20 hover:bg-primary/5 font-bold shrink-0 p-0"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    {buyError && (
+                      <p className="text-xs text-[hsl(var(--neon-red))] flex items-center gap-1 font-semibold whitespace-normal break-words">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        {buyError}
+                      </p>
+                    )}
+
+                    {/* Chi tiết ví và thanh toán */}
+                    <div className="p-3 bg-[#070913]/60 border border-primary/10 rounded-xl space-y-2 w-full">
+                      <div className="flex justify-between items-center text-xs text-muted-foreground w-full">
+                        <span className="shrink-0 font-medium">Số dư ví DTA hiện có:</span>
+                        <span className="font-bold text-[hsl(var(--neon-cyan))] font-mono text-right shrink-0">
+                          {!user ? "0 VNĐ" : formatVND(userBalance)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center w-full pt-1 border-t border-primary/5">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground shrink-0">Tổng thanh toán:</span>
+                        <span className="text-base font-black font-mono text-[hsl(var(--neon-cyan))] text-right shrink-0">
+                          {formatVND(getSubtotal())}
+                        </span>
+                      </div>
+
+                      {/* Warning số dư */}
+                      {userBalance < getSubtotal() && (
+                        <div className="mt-2 p-2.5 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-2 w-full">
+                          <p className="text-[10px] text-[hsl(var(--neon-red))] font-semibold flex items-center gap-1.5 whitespace-normal break-words">
+                            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                            Số dư ví không đủ để mua!
+                          </p>
+                          <Button 
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setIsDetailOpen(false);
+                              setIsWalletOpen(true);
+                            }}
+                            className="border-[hsl(var(--neon-red))/30] hover:bg-red-500/20 text-[hsl(var(--neon-red))] font-bold text-[9px] uppercase h-7 rounded-lg w-full"
+                          >
+                            Nạp thêm tiền ví
+                          </Button>
                         </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div className="p-4 text-center border border-dashed border-primary/10 rounded-xl text-xs text-muted-foreground w-full">
-                    Không tìm thấy phân loại bán hàng nào cho sản phẩm này.
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Form số lượng cho Variant đã chọn */}
-              {selectedVariant && (
-                <div className="space-y-3 pt-2 border-t border-primary/5 w-full">
-                  <div className="flex justify-between items-center text-xs font-bold text-muted-foreground uppercase tracking-wider w-full">
-                    <span>Số lượng mua:</span>
-                    <span className="font-mono text-[10px] font-medium lowercase">
-                      (Giới hạn: {selectedVariant.min} - {selectedVariant.max} cái)
+              {/* CỘT PHẢI (8/12): Tên, Giá, Stats, Chọn Variants dạng dòng dài w-full */}
+              <div className="md:col-span-8 flex flex-col justify-start min-w-0 w-full space-y-4">
+                <div className="space-y-3 min-w-0 w-full">
+                  {/* Tên sản phẩm */}
+                  <h4 className="font-black text-foreground text-base md:text-lg leading-tight break-words whitespace-normal uppercase tracking-wide">
+                    {selectedProduct.name}
+                  </h4>
+
+                  {/* Giá sản phẩm (Giá của variant đang chọn, hoặc khoảng giá nếu chưa chọn) */}
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl md:text-2xl font-black text-[hsl(var(--neon-cyan))] font-mono">
+                      {selectedVariant ? formatVND(selectedVariant.price) : selectedProduct.priceRaw}
                     </span>
-                  </div>
-                  
-                  <div className="flex items-center gap-2 w-full">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const newAmount = Math.max(parseInt(selectedVariant.min, 10) || 1, buyAmount - 1);
-                        setBuyAmount(newAmount);
-                        handleAmountChange(newAmount.toString(), selectedVariant);
-                      }}
-                      className="h-10 w-10 rounded-xl border-primary/20 hover:bg-primary/5 font-bold shrink-0"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </Button>
-                    
-                    <Input
-                      type="number"
-                      min={selectedVariant.min}
-                      max={selectedVariant.max}
-                      value={buyAmount === 0 ? '' : buyAmount}
-                      onChange={(e) => handleAmountChange(e.target.value, selectedVariant)}
-                      className="flex-1 rounded-xl border-primary/20 bg-[#070913]/50 focus-visible:ring-[hsl(var(--neon-cyan))] font-mono font-bold text-center text-sm h-10 text-foreground"
-                    />
-
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => {
-                        const newAmount = Math.min(selectedVariant.amount, buyAmount + 1);
-                        setBuyAmount(newAmount);
-                        handleAmountChange(newAmount.toString(), selectedVariant);
-                      }}
-                      className="h-10 w-10 rounded-xl border-primary/20 hover:bg-primary/5 font-bold shrink-0"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-
-                  {buyError && (
-                    <p className="text-xs text-[hsl(var(--neon-red))] flex items-center gap-1 font-semibold whitespace-normal break-words">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      {buyError}
-                    </p>
-                  )}
-
-                  {/* Chi tiết số dư và thanh toán (Đã thiết lập w-full, flex-row alignment chống tràn) */}
-                  <div className="mt-3 p-3.5 bg-[#070913]/60 border border-primary/10 rounded-xl space-y-2 w-full">
-                    <div className="flex justify-between items-center text-xs text-muted-foreground w-full">
-                      <span className="shrink-0 font-medium">Số dư ví DTA hiện có:</span>
-                      <span className="font-bold text-[hsl(var(--neon-cyan))] font-mono text-right shrink-0">
-                        {!user ? "0 VNĐ" : formatVND(userBalance)}
+                    {selectedVariant && (
+                      <span className="text-xs text-muted-foreground line-through font-mono">
+                        {formatVND(selectedVariant.originalPrice)}
                       </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center w-full pt-1 border-t border-primary/5">
-                      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground shrink-0">Tổng thanh toán:</span>
-                      <span className="text-base font-black font-mono text-[hsl(var(--neon-cyan))] text-right shrink-0">
-                        {formatVND(getSubtotal())}
-                      </span>
-                    </div>
-
-                    {/* Warning số dư */}
-                    {userBalance < getSubtotal() && (
-                      <div className="mt-2 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex flex-col gap-2 w-full">
-                        <p className="text-[11px] text-[hsl(var(--neon-red))] font-semibold flex items-center gap-1.5 whitespace-normal break-words">
-                          <AlertCircle className="w-4 h-4 shrink-0" />
-                          Số dư ví của bạn không đủ để thanh toán!
-                        </p>
-                        <Button 
-                          size="sm"
-                          variant="outline"
-                          onClick={() => {
-                            setIsDetailOpen(false);
-                            setIsWalletOpen(true);
-                          }}
-                          className="border-[hsl(var(--neon-red))/30] hover:bg-red-500/20 text-[hsl(var(--neon-red))] font-bold text-[10px] uppercase h-8 rounded-lg w-full"
-                        >
-                          Nạp thêm tiền ví
-                        </Button>
-                      </div>
                     )}
                   </div>
+
+                  {/* Hàng Stats nhỏ */}
+                  <div className="flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground font-mono border-y border-primary/5 py-2 w-full">
+                    <span>Mã SP: <strong className="text-foreground">{selectedProduct.id}</strong></span>
+                    <span>|</span>
+                    <span>Tồn kho: <strong className="text-foreground">{selectedVariant ? selectedVariant.amount : selectedProduct.stock}</strong></span>
+                    <span>|</span>
+                    <span>Đã bán: <strong className="text-foreground">{selectedProduct.sold}</strong></span>
+                    <span>|</span>
+                    <span>Khiếu nại: <strong className="text-green-400">0%</strong></span>
+                  </div>
                 </div>
-              )}
+
+                {/* Chọn phân loại (Variants) dạng dòng dài w-full */}
+                <div className="space-y-2 pt-2 w-full">
+                  <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider font-mono block">
+                    Chọn phân loại (Variants)
+                  </label>
+
+                  {isDetailLoading ? (
+                    <div className="py-6 text-center space-y-2 border border-dashed border-primary/10 rounded-xl w-full">
+                      <RefreshCw className="w-5 h-5 mx-auto text-primary animate-spin" />
+                      <p className="text-xs text-muted-foreground font-mono">Đang chuẩn bị phân loại tài nguyên...</p>
+                    </div>
+                  ) : detailData?.status === 'success' && detailData.product?.variants && detailData.product.variants.length > 0 ? (
+                    <div className="space-y-2.5 w-full">
+                      {detailData.product.variants.map((variant) => {
+                        const isSelected = selectedVariant?.id === variant.id;
+                        const isOutOfStock = variant.amount <= 0;
+
+                        return (
+                          <button
+                            key={variant.id}
+                            type="button"
+                            disabled={isOutOfStock}
+                            onClick={() => {
+                              setSelectedVariant(variant);
+                              setBuyAmount(parseInt(variant.min, 10) || 1);
+                              setBuyError(null);
+                            }}
+                            className={`p-3.5 rounded-xl border text-xs font-bold transition-all text-left flex items-center justify-between gap-4 w-full ${
+                              isOutOfStock 
+                              ? 'bg-[#070913]/30 border-dashed border-primary/5 opacity-40 cursor-not-allowed text-muted-foreground/60'
+                              : isSelected
+                              ? 'bg-[#070913] border-[#FFC107] text-foreground shadow-[0_0_12px_rgba(255,193,7,0.1)] ring-1 ring-[#FFC107]/50'
+                              : 'bg-background/40 border-primary/10 text-muted-foreground hover:text-foreground hover:border-primary/30'
+                            }`}
+                          >
+                            {/* Tên variant đầy đủ (chiếm hết chiều ngang và tự động xuống dòng) */}
+                            <div className="flex-1 min-w-0 pr-2">
+                              <span className="block font-bold text-foreground text-[12px] leading-snug whitespace-normal break-words">
+                                {variant.name}
+                              </span>
+                            </div>
+                            
+                            {/* Đơn giá và tồn kho ở bên phải (có vạch ngăn cách nhẹ) */}
+                            <div className="text-right shrink-0 flex flex-col justify-center items-end gap-1 border-l border-primary/5 pl-4 min-w-[90px]">
+                              <span className={`text-[12px] font-mono font-black ${isSelected ? 'text-[#FFC107]' : 'text-[hsl(var(--neon-cyan))]'}`}>
+                                {formatVND(variant.price)}
+                              </span>
+                              <span className="text-[10px] text-muted-foreground font-mono">
+                                Kho: <strong className="text-foreground">{variant.amount}</strong>
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : detailData?.status === 'error' ? (
+                    <div className="p-4 text-center border border-dashed border-red-500/20 rounded-xl text-xs text-red-400 bg-red-500/5 w-full">
+                      <p className="font-bold mb-1">Lỗi tải dữ liệu:</p>
+                      <p className="font-mono mb-2">{detailData.msg || 'Không thể lấy thông tin từ Server'}</p>
+                      <p className="text-[10px] text-muted-foreground">Admin vui lòng kiểm tra biến SHOPMINI_API_KEY trên Vercel / file .env</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 text-center border border-dashed border-primary/10 rounded-xl text-xs text-muted-foreground w-full">
+                      Không tìm thấy phân loại bán hàng nào cho sản phẩm này.
+                    </div>
+                  )}
+                </div>
+              </div>
+
             </div>
           )}
 

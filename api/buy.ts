@@ -174,6 +174,22 @@ export default async function handler(req: any, res: any) {
     const shopData = await shopRes.json();
 
     if (shopData.status === 'success') {
+      // Cập nhật chi tiết đơn hàng dạng JSON vào description của transaction để lưu lịch sử bàn giao tài nguyên
+      const orderDetail = JSON.stringify({
+        isResource: true,
+        productName: shopProduct.name,
+        variantName: shopProduct.name,
+        amount: buyAmount,
+        price: dtaPrice,
+        shopminiTransId: shopData.trans_id,
+        deliveredData: shopData.data
+      });
+
+      await dbClient
+        .from('transactions')
+        .update({ description: orderDetail })
+        .eq('id', tx.id);
+
       // Giao dịch thành công! Trả kết quả về
       return res.status(200).json({
         status: 'success',
@@ -190,7 +206,7 @@ export default async function handler(req: any, res: any) {
       
       await dbClient
         .from('transactions')
-        .update({ status: 'failed', description: `[THẤT BẠI] ${shopData.msg || 'Đối tác từ chối giao dịch'}` })
+        .update({ status: 'failed', description: `[THẤT BẠI] Mua thất bại: ${shopData.msg || 'Đối tác từ chối giao dịch'}` })
         .eq('id', tx.id);
 
       return res.status(400).json({

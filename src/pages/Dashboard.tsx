@@ -11,8 +11,10 @@ import {
     Copy,
     CheckCircle2,
     Download,
-    Terminal
+    Terminal,
+    ShoppingCart
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useEffect, useState } from 'react';
 
 import Header from '@/components/Header';
@@ -38,6 +40,22 @@ const Dashboard = () => {
     const { history } = useDownloadHistory();
 
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
+    const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+    const [isOrderOpen, setIsOrderOpen] = useState(false);
+    const [copiedOrderIdx, setCopiedOrderIdx] = useState<number | null>(null);
+
+    const parseResourceOrder = (desc: string) => {
+        if (!desc || !desc.trim().startsWith('{')) return null;
+        try {
+            const parsed = JSON.parse(desc);
+            if (parsed && parsed.isResource) {
+                return parsed;
+            }
+        } catch (e) {
+            // Không phải JSON
+        }
+        return null;
+    };
 
     const copyToClipboard = (text: string, id: string) => {
         navigator.clipboard.writeText(text);
@@ -121,7 +139,7 @@ const Dashboard = () => {
                     )}
 
                     <Tabs defaultValue="overview" className="w-full">
-                        <TabsList className="grid w-full grid-cols-3 glass-card p-1 rounded-xl mb-8 h-auto">
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 glass-card p-1 rounded-xl mb-8 h-auto gap-1">
                             <TabsTrigger value="overview" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                                 <Wallet className="w-4 h-4 mr-2" />
                                 {language === 'vi' ? 'Tổng Quan' : 'Overview'}
@@ -130,9 +148,13 @@ const Dashboard = () => {
                                 <Package className="w-4 h-4 mr-2" />
                                 {language === 'vi' ? 'Ứng Dụng' : 'My Apps'}
                             </TabsTrigger>
+                            <TabsTrigger value="resources" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+                                <ShoppingCart className="w-4 h-4 mr-2" />
+                                {language === 'vi' ? 'Tài Nguyên' : 'Resources'}
+                            </TabsTrigger>
                             <TabsTrigger value="history" className="rounded-lg py-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
                                 <History className="w-4 h-4 mr-2" />
-                                {language === 'vi' ? 'Lịch Sử' : 'History'}
+                                {language === 'vi' ? 'Lịch Sử Tải' : 'Downloads'}
                             </TabsTrigger>
                         </TabsList>
 
@@ -286,8 +308,217 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </TabsContent>
+
+                        {/* RESOURCES TAB (LỊCH SỬ MUA TÀI NGUYÊN) */}
+                        <TabsContent value="resources">
+                            <div className="glass-card rounded-xl overflow-hidden p-6">
+                                <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-[hsl(var(--neon-cyan))]">
+                                    <ShoppingCart className="w-5 h-5" />
+                                    {language === 'vi' ? 'Đơn Hàng Tài Nguyên Đã Mua' : 'Resource Purchase History'}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mb-6">
+                                    {language === 'vi' 
+                                        ? 'Xem lại tài khoản/mật khẩu các tài nguyên bạn đã mua và thông tin hỗ trợ bảo hành.' 
+                                        : 'Review credentials of purchased resources and warranty support details.'}
+                                </p>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-primary/20 bg-primary/5 text-xs text-muted-foreground font-mono">
+                                                <th className="px-6 py-3 font-bold uppercase tracking-wider">{language === 'vi' ? 'Sản phẩm' : 'Product'}</th>
+                                                <th className="px-6 py-3 font-bold uppercase tracking-wider">{language === 'vi' ? 'Số lượng' : 'Qty'}</th>
+                                                <th className="px-6 py-3 font-bold uppercase tracking-wider">{language === 'vi' ? 'Tổng chi' : 'Total Cost'}</th>
+                                                <th className="px-6 py-3 font-bold uppercase tracking-wider">{language === 'vi' ? 'Ngày mua' : 'Date'}</th>
+                                                <th className="px-6 py-3 font-bold uppercase tracking-wider text-right">{language === 'vi' ? 'Chi tiết' : 'Action'}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-primary/10 text-sm">
+                                            {data?.transactions.filter(t => t.type === 'purchase' && parseResourceOrder(t.description) !== null).length > 0 ? (
+                                                data.transactions
+                                                    .filter(t => t.type === 'purchase')
+                                                    .map((t) => {
+                                                        const order = parseResourceOrder(t.description);
+                                                        if (!order) return null;
+
+                                                        return (
+                                                            <tr key={t.id} className="hover:bg-primary/5 transition-colors">
+                                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                                    <div className="font-bold text-foreground">{order.productName}</div>
+                                                                    <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{order.variantName}</div>
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap font-mono font-bold text-xs">
+                                                                    {order.amount}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap font-mono font-bold text-xs text-[hsl(var(--neon-cyan))]">
+                                                                    {Math.abs(t.amount).toLocaleString('vi-VN')} đ
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-xs text-muted-foreground font-mono">
+                                                                    {new Date(t.created_at).toLocaleString()}
+                                                                </td>
+                                                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                                                    <Button
+                                                                        size="sm"
+                                                                        variant="outline"
+                                                                        className="border-primary/20 hover:border-[hsl(var(--neon-cyan))]/0.3 hover:text-[hsl(var(--neon-cyan))]"
+                                                                        onClick={() => {
+                                                                            setSelectedOrder(order);
+                                                                            setIsOrderOpen(true);
+                                                                        }}
+                                                                    >
+                                                                        {language === 'vi' ? 'Xem tài nguyên' : 'View Account'}
+                                                                    </Button>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-mono text-xs">
+                                                        {language === 'vi' ? 'Bạn chưa mua tài nguyên nào.' : 'No resource purchases found.'}
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </TabsContent>
                     </Tabs>
                 </div>
+
+                {/* DIALOG CHI TIẾT TÀI NGUYÊN ĐÃ MUA */}
+                <Dialog open={isOrderOpen} onOpenChange={(open) => {
+                    setIsOrderOpen(open);
+                    if (!open) {
+                        setSelectedOrder(null);
+                        setCopiedOrderIdx(null);
+                    }
+                }}>
+                    <DialogContent className="max-w-xl glass border-[hsl(var(--neon-cyan)/0.3)] bg-[#070913]/95 text-foreground rounded-3xl p-6 shadow-[0_0_25px_rgba(0,255,255,0.08)]">
+                        <DialogHeader className="border-b border-primary/10 pb-3">
+                            <DialogTitle className="text-lg font-black text-[hsl(var(--neon-cyan))] flex items-center gap-2 uppercase tracking-wide">
+                                <ShoppingCart className="w-5 h-5 text-primary" />
+                                Tài Nguyên Đã Bàn Giao
+                            </DialogTitle>
+                            <DialogDescription className="text-xs">
+                                Chi tiết tài khoản/mật khẩu và thông tin bảo hành đơn hàng của bạn.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        {selectedOrder && (
+                            <div className="space-y-4 py-2 w-full min-w-0 text-left">
+                                {/* Box thông tin sản phẩm */}
+                                <div className="p-3.5 bg-primary/5 border border-primary/10 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center gap-2 w-full min-w-0">
+                                    <div>
+                                        <h4 className="font-bold text-foreground text-sm leading-snug break-words whitespace-normal">
+                                            {selectedOrder.productName}
+                                        </h4>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
+                                            Gói: <strong className="text-foreground">{selectedOrder.variantName}</strong>
+                                        </p>
+                                    </div>
+                                    <div className="text-left sm:text-right shrink-0">
+                                        <span className="text-[10px] text-muted-foreground font-mono block">
+                                            Số lượng: <strong className="text-foreground">{selectedOrder.amount}</strong>
+                                        </span>
+                                        <span className="text-xs font-mono font-black text-[hsl(var(--neon-cyan))] block">
+                                            {(selectedOrder.price * selectedOrder.amount).toLocaleString('vi-VN')} đ
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Box Mã đơn hàng & Bảo hành */}
+                                <div className="p-3.5 bg-yellow-500/5 border border-yellow-500/10 rounded-2xl space-y-2 w-full min-w-0">
+                                    <div className="flex justify-between items-center text-xs font-bold text-yellow-500 uppercase tracking-wider font-mono">
+                                        <span>Thông tin bảo hành đơn hàng</span>
+                                    </div>
+                                    <p className="text-[11px] text-muted-foreground leading-relaxed whitespace-normal break-words">
+                                        Nếu tài khoản bị lỗi hoặc cần hỗ trợ, vui lòng gửi mã giao dịch dưới đây cho Admin Đức Trường (Zalo: 0962.775.506) để được đổi trả/bảo hành 24/7.
+                                    </p>
+                                    <div className="bg-background/80 p-2.5 rounded-xl border border-primary/5 flex items-center justify-between gap-3 min-w-0">
+                                        <div className="text-xs font-mono font-bold text-foreground truncate min-w-0">
+                                            Mã GD: <span className="text-yellow-500">{selectedOrder.shopminiTransId}</span>
+                                        </div>
+                                        <Button
+                                            size="sm"
+                                            className="h-7 hover:text-yellow-500 text-muted-foreground py-1 px-2.5 rounded-lg border border-primary/10 bg-transparent shrink-0 font-mono text-[10px] uppercase font-bold"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(selectedOrder.shopminiTransId);
+                                                toast({
+                                                    title: "Copied!",
+                                                    description: "Mã giao dịch đã được copy.",
+                                                });
+                                            }}
+                                        >
+                                            Copy mã
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                {/* Danh sách tài khoản bàn giao */}
+                                <div className="space-y-2 w-full min-w-0">
+                                    <div className="flex justify-between items-center text-xs font-bold text-muted-foreground uppercase tracking-wider font-mono">
+                                        <span>Thông tin tài khoản bàn giao</span>
+                                        <Button
+                                            variant="link"
+                                            className="text-[hsl(var(--neon-cyan))] p-0 h-auto font-mono text-[10px] lowercase font-bold hover:no-underline"
+                                            onClick={() => {
+                                                const allText = selectedOrder.deliveredData.join('\n');
+                                                navigator.clipboard.writeText(allText);
+                                                toast({
+                                                    title: "Copied All!",
+                                                    description: "Toàn bộ tài khoản đã được copy.",
+                                                });
+                                            }}
+                                        >
+                                            Copy tất cả ({selectedOrder.deliveredData.length} dòng)
+                                        </Button>
+                                    </div>
+
+                                    <div className="space-y-2 max-h-[200px] overflow-y-auto pr-1 scrollbar-thin w-full">
+                                        {selectedOrder.deliveredData.map((item: string, idx: number) => (
+                                            <div 
+                                                key={idx}
+                                                className="p-3 bg-background/50 border border-primary/5 rounded-xl flex items-center justify-between gap-4 w-full min-w-0 text-xs font-mono hover:border-primary/20 transition-all"
+                                            >
+                                                <span className="text-foreground select-all truncate min-w-0 flex-1">{item}</span>
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 rounded-lg text-muted-foreground hover:text-[hsl(var(--neon-cyan))] border border-primary/5 shrink-0"
+                                                    onClick={() => {
+                                                        navigator.clipboard.writeText(item);
+                                                        setCopiedOrderIdx(idx);
+                                                        toast({
+                                                            title: "Copied Line!",
+                                                            description: `Đã copy dòng thứ ${idx + 1}.`,
+                                                        });
+                                                        setTimeout(() => setCopiedOrderIdx(null), 2000);
+                                                    }}
+                                                >
+                                                    {copiedOrderIdx === idx ? <CheckCircle2 className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="pt-2 flex justify-end w-full">
+                                    <Button
+                                        onClick={() => {
+                                            setIsOrderOpen(false);
+                                            setSelectedOrder(null);
+                                        }}
+                                        className="rounded-xl px-5 py-4 text-xs font-bold bg-primary/10 text-foreground border border-primary/10 hover:bg-primary/20"
+                                    >
+                                        Đóng lại
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </DialogContent>
+                </Dialog>
             </main>
             <Footer />
         </div>
