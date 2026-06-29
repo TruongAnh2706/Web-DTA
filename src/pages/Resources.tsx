@@ -174,14 +174,19 @@ export default function Resources() {
   const {
     data: detailData,
     isLoading: isDetailLoading,
+    isError: isDetailError,
+    error: detailError,
     refetch: refetchDetail
   } = useQuery<ProductDetailResponse>({
     queryKey: ['shopmini-product-detail', selectedProduct?.id],
     queryFn: async () => {
       if (!selectedProduct) return { status: 'error' };
       const res = await fetch(`/api/products?id=${selectedProduct.id}`);
-      if (!res.ok) throw new Error('Không thể tải chi tiết phân loại');
-      return res.json();
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.msg || `Không thể tải chi tiết phân loại (Mã lỗi ${res.status})`);
+      }
+      return data;
     },
     enabled: !!selectedProduct && isDetailOpen
   });
@@ -1221,6 +1226,12 @@ export default function Resources() {
                     <div className="py-6 text-center space-y-2 border border-dashed border-primary/10 rounded-xl w-full">
                       <RefreshCw className="w-5 h-5 mx-auto text-primary animate-spin" />
                       <p className="text-xs text-muted-foreground font-mono">Đang chuẩn bị phân loại tài nguyên...</p>
+                    </div>
+                  ) : isDetailError ? (
+                    <div className="p-4 text-center border border-dashed border-red-500/20 rounded-xl text-xs text-red-400 bg-red-500/5 w-full">
+                      <p className="font-bold mb-1">Lỗi tải dữ liệu:</p>
+                      <p className="font-mono mb-2">{detailError instanceof Error ? detailError.message : 'Không thể lấy thông tin từ Server'}</p>
+                      <p className="text-[10px] text-muted-foreground">Admin vui lòng kiểm tra biến SHOPMINI_API_KEY trên Vercel / file .env</p>
                     </div>
                   ) : detailData?.status === 'success' && detailData.product?.variants && detailData.product.variants.length > 0 ? (
                     <div className="space-y-2.5 w-full">
