@@ -27,7 +27,14 @@ export default async function handler(req: any, res: any) {
   // TRƯỜNG HỢP 1: Lấy chi tiết variants của 1 sản phẩm chính (Real-time)
   if (id) {
     try {
-      const response = await fetch(`https://shopmini.net/api/products.php?api_key=${apiKey}&id=${id}`);
+      const response = await fetch(`https://shopmini.net/api/products.php?api_key=${apiKey}&id=${id}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+          'Accept': 'application/json, text/plain, */*',
+          'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Referer': 'https://shopmini.net/'
+        }
+      });
       if (!response.ok) {
         return res.status(response.status).json({ 
           status: 'error', 

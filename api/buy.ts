@@ -47,7 +47,14 @@ export default async function handler(req: any, res: any) {
 
   try {
     // 2. Lấy thông tin variant chi tiết từ ShopMini để lấy giá gốc thật và tồn kho thật
-    const variantRes = await fetch(`https://shopmini.net/api/product.php?api_key=${apiKey}&product=${id}`);
+    const variantRes = await fetch(`https://shopmini.net/api/product.php?api_key=${apiKey}&product=${id}`, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://shopmini.net/'
+      }
+    });
     if (!variantRes.ok) {
       return res.status(variantRes.status).json({
         status: 'error',
@@ -149,6 +156,10 @@ export default async function handler(req: any, res: any) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+        'Referer': 'https://shopmini.net/'
       },
       body: formData.toString()
     });
