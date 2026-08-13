@@ -10,7 +10,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 import { AIChatWidget } from "@/components/AIChatWidget";
 import { CustomCursor } from "@/components/CustomCursor";
-import "./pages/games/styles/index.css";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -30,13 +29,6 @@ const About = lazy(() => import("./pages/About"));
 const Products = lazy(() => import("./pages/Products"));
 const Resources = lazy(() => import("./pages/Resources"));
 import RootLayout from "./components/layout/RootLayout";
-
-// DTA Stealth Games
-const WorkspaceHub = lazy(() => import("./pages/games/WorkspaceHub"));
-const BattleshipGame = lazy(() => import("./pages/games/BattleshipGame"));
-const CaroGame = lazy(() => import("./pages/games/CaroGame"));
-const WordChainGame = lazy(() => import("./pages/games/WordChainGame"));
-const HangmanGame = lazy(() => import("./pages/games/HangmanGame"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -86,13 +78,6 @@ const App = () => (
                     <Route path="/faq" element={<FAQ />} />
                     <Route path="*" element={<NotFound />} />
                   </Route>
-
-                  {/* DTA Stealth Games (Outside Layout) */}
-                  <Route path="/workspace" element={<WorkspaceHub />} />
-                  <Route path="/workspace/diagnostic" element={<BattleshipGame />} />
-                  <Route path="/workspace/sheets" element={<CaroGame />} />
-                  <Route path="/workspace/docs" element={<WordChainGame />} />
-                  <Route path="/workspace/decrypt" element={<HangmanGame />} />
                 </Routes>
                 <AIChatWidget />
                 <CustomCursor />

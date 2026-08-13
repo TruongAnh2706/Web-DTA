@@ -313,7 +313,7 @@ const AdminPage = () => {
     <div className="relative min-h-screen">
       <AnimatedBackground />
 
-      <div className="relative px-4 py-8">
+      <div className="relative px-4 sm:px-6 pt-28 sm:pt-32 pb-12">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <motion.div
